@@ -6,7 +6,7 @@ namespace CanvasRabbitMQSender
 {
     class Event
     {
-        public Event(int id, string title, string description, string locationName, string locationAddress, DateTime startAt, DateTime endAt, int contextId, string contextType) 
+        public Event(int id, string title, string description, string locationName, string locationAddress, DateTime startAt, DateTime endAt, int contextId, string contextType, DateTime createdAt, DateTime updatedAt) 
         {
             Id = id;
             Title = title;
@@ -17,6 +17,8 @@ namespace CanvasRabbitMQSender
             EndAt = endAt;
             ContextId = contextId;
             ContextType = contextType;
+            CreatedAt = createdAt;
+            UpdatedAt = updatedAt;
         }
         public int Id { get; set; }
         public string Title { get; set; }
@@ -29,6 +31,8 @@ namespace CanvasRabbitMQSender
         public string ContextType { get; set; }
         public string OrganiserId { get; set; }
         public string UUID { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
 
     }
 }

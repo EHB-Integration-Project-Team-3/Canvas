@@ -50,7 +50,7 @@ namespace CanvasRabbitMQSender
                 connection.Open();
                 string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
 
-                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid FROM public.calendar_events where updated_at > '"+ nowMinus5+ "'";
+                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at FROM public.calendar_events where updated_at > '"+ nowMinus5+ "'";
 
                 Console.WriteLine(sql);
                 Event newEvent;
@@ -90,7 +90,9 @@ namespace CanvasRabbitMQSender
                                 reader.GetDateTime(5),
                                 reader.GetDateTime(6),
                                 reader.GetInt32(7),
-                                reader.GetString(8));
+                                reader.GetString(8),
+                                reader.GetDateTime(10),
+                                reader.GetDateTime(11));
                             if (!reader.IsDBNull(9))
                             {
                                 newEvent.UUID = reader.GetString(9);
@@ -166,9 +168,19 @@ namespace CanvasRabbitMQSender
                     //channel.ExchangeDeclare(exchange: "event-exchange", type: ExchangeType.Fanout);
                     var body = Encoding.UTF8.GetBytes(xml);
 
+                    IBasicProperties props = channel.CreateBasicProperties();
+                    props.Headers = new Dictionary<string, object>();
+                    if (Event.UpdatedAt == Event.CreatedAt)
+                    {
+                        props.Headers.Add("CRUD", "CREATE");
+                    }
+                    else 
+                    {
+                        props.Headers.Add("CRUD", "UPDATE");
+                    }
                     channel.BasicPublish(exchange: "event-exchange",
                                          routingKey: "",
-                                         basicProperties: null,
+                                         basicProperties: props,
                                          body: body);
                     Console.WriteLine(" [x] Sent {0}", xml);
                 }
