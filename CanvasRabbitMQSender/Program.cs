@@ -168,19 +168,10 @@ namespace CanvasRabbitMQSender
                     //channel.ExchangeDeclare(exchange: "event-exchange", type: ExchangeType.Fanout);
                     var body = Encoding.UTF8.GetBytes(xml);
 
-                    IBasicProperties props = channel.CreateBasicProperties();
-                    props.Headers = new Dictionary<string, object>();
-                    if (Event.UpdatedAt == Event.CreatedAt)
-                    {
-                        props.Headers.Add("CRUD", "CREATE");
-                    }
-                    else 
-                    {
-                        props.Headers.Add("CRUD", "UPDATE");
-                    }
+                    
                     channel.BasicPublish(exchange: "event-exchange",
                                          routingKey: "",
-                                         basicProperties: props,
+                                         basicProperties: null,
                                          body: body);
                     Console.WriteLine(" [x] Sent {0}", xml);
                 }
@@ -205,6 +196,16 @@ namespace CanvasRabbitMQSender
                     writer.WriteStartElement("Event");
                     writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", null, "event.xsd");
                     writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
+                    writer.WriteStartElement("header");
+                    if (Event.UpdatedAt == Event.CreatedAt)
+                    {
+                        writer.WriteElementString("method","CREATE");
+                    }
+                    else
+                    {
+                        writer.WriteElementString("method", "UPDATE");
+                    }
+                    writer.WriteEndElement();
                     writer.WriteElementString("uuid", Event.UUID);
                     writer.WriteElementString("entityVersion", "15");
                     writer.WriteElementString("title", Event.Title);
