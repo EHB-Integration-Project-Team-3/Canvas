@@ -50,9 +50,9 @@ namespace CanvasRabbitMQSender
                 connection.Open();
                 string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
 
-                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at FROM public.calendar_events where updated_at > '"+ nowMinus5+ "'";
+                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at FROM public.calendar_events where updated_at > now() - interval '5 second'";
 
-                Console.WriteLine(sql);
+                Console.WriteLine(nowMinus5);
                 Event newEvent;
                 using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
                 {
@@ -87,12 +87,13 @@ namespace CanvasRabbitMQSender
                                 description,
                                 locationName,
                                 locationAddress,
-                                reader.GetDateTime(5),
-                                reader.GetDateTime(6),
+                                reader.GetDateTime(5).AddHours(2),
+                                reader.GetDateTime(6).AddHours(2),
                                 reader.GetInt32(7),
                                 reader.GetString(8),
                                 reader.GetDateTime(10),
                                 reader.GetDateTime(11));
+                            Console.WriteLine(newEvent.UpdatedAt.ToString());
                             if (!reader.IsDBNull(9))
                             {
                                 newEvent.UUID = reader.GetString(9);
@@ -102,7 +103,6 @@ namespace CanvasRabbitMQSender
                                 newEvent.UUID = MakeUUID(reader.GetInt32(0));
                             }
                             newEvents.Add(newEvent);
-                            Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
                             Console.WriteLine("Found event: " + newEvent.Title);
                         }
                     }
@@ -159,13 +159,12 @@ namespace CanvasRabbitMQSender
             {
                 string xml = ConvertToXml(Event);
                 //send it to rabbitMQ
-                var factory = new ConnectionFactory() { HostName = "10.3.17.62"};
-                //factory.UserName = "canvas";
-                //factory.Password = "ubuntu123";
+                var factory = new ConnectionFactory() { HostName = "10.3.17.61"};
+                factory.UserName = "guest";
+                factory.Password = "guest";
                 using (var connection = factory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
-                    //channel.ExchangeDeclare(exchange: "event-exchange", type: ExchangeType.Fanout);
                     var body = Encoding.UTF8.GetBytes(xml);
 
                     
@@ -193,7 +192,7 @@ namespace CanvasRabbitMQSender
                     // Build Xml with xw.
 
                     writer.WriteStartDocument();
-                    writer.WriteStartElement("Event");
+                    writer.WriteStartElement("event");
                     writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", null, "event.xsd");
                     writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
                     writer.WriteStartElement("header");
@@ -213,21 +212,21 @@ namespace CanvasRabbitMQSender
                     writer.WriteElementString("description", Event.Description);
                     writer.WriteElementString("start", Event.StartAt.ToString());
                     writer.WriteElementString("end", Event.EndAt.ToString());
-                    writer.WriteStartElement("Location");
-                    writer.WriteElementString("locationName", Event.LocationName);
+                    //writer.WriteElementString("locationName", Event.LocationName);
                     //writer.WriteElementString("locationAddress", Event.LocationAddress);
                     if (Event.LocationAddress.Contains('%'))// formaat: straatnaam % huisnr % postcode % stad
                     {
                         string[] address = Event.LocationAddress.Split('%');
                         if (address.Length == 4)
                         {
+                            writer.WriteStartElement("Location");
                             writer.WriteElementString("streetname", address[0]);
                             writer.WriteElementString("number", address[1]);
                             writer.WriteElementString("city", address[3]);
                             writer.WriteElementString("postalcode", address[2]);
+                            writer.WriteEndElement();
                         }
                     }
-                    writer.WriteEndElement();
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
                     writer.Flush();
