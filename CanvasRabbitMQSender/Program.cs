@@ -50,7 +50,7 @@ namespace CanvasRabbitMQSender
                 connection.Open();
                 string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
 
-                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at FROM public.calendar_events where updated_at > now() - interval '5 second'";
+                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at, deleted_at FROM public.calendar_events where updated_at > now() - interval '5 second'";
 
                 Console.WriteLine(nowMinus5);
                 Event newEvent;
@@ -64,6 +64,7 @@ namespace CanvasRabbitMQSender
                             string description = "";
                             string locationAddress = "";
                             string locationName = "";
+                            bool deleted = false;
 
                             if (!reader.IsDBNull(1))
                             {
@@ -81,6 +82,10 @@ namespace CanvasRabbitMQSender
                             {
                                 locationAddress = reader.GetString(4);
                             }
+                            if (!reader.IsDBNull(12))
+                            {
+                                deleted = true;
+                            }
                             newEvent = new Event(
                                 reader.GetInt32(0),
                                 title,
@@ -92,7 +97,9 @@ namespace CanvasRabbitMQSender
                                 reader.GetInt32(7),
                                 reader.GetString(8),
                                 reader.GetDateTime(10),
-                                reader.GetDateTime(11));
+                                reader.GetDateTime(11),
+                                deleted
+                                );
                             Console.WriteLine(newEvent.UpdatedAt.ToString());
                             if (!reader.IsDBNull(9))
                             {
@@ -159,7 +166,7 @@ namespace CanvasRabbitMQSender
             {
                 string xml = ConvertToXml(Event);
                 //send it to rabbitMQ
-                var factory = new ConnectionFactory() { HostName = "10.3.17.61"};
+                var factory = new ConnectionFactory() { HostName = "10.3.17.62"};
                 factory.UserName = "guest";
                 factory.Password = "guest";
                 using (var connection = factory.CreateConnection())
@@ -200,10 +207,18 @@ namespace CanvasRabbitMQSender
                     {
                         writer.WriteElementString("method","CREATE");
                     }
-                    else
+                    else 
                     {
-                        writer.WriteElementString("method", "UPDATE");
+                        if (Event.Deleted)
+                        {
+                            writer.WriteElementString("method", "DELETE");
+                        }
+                        else
+                        {
+                            writer.WriteElementString("method", "UPDATE");
+                        }
                     }
+                    writer.WriteElementString("source", "CANVAS ");
                     writer.WriteEndElement();
                     writer.WriteElementString("uuid", Event.UUID);
                     writer.WriteElementString("entityVersion", "15");
@@ -212,21 +227,21 @@ namespace CanvasRabbitMQSender
                     writer.WriteElementString("description", Event.Description);
                     writer.WriteElementString("start", Event.StartAt.ToString());
                     writer.WriteElementString("end", Event.EndAt.ToString());
-                    //writer.WriteElementString("locationName", Event.LocationName);
+                    writer.WriteElementString("location", Event.LocationAddress);
                     //writer.WriteElementString("locationAddress", Event.LocationAddress);
-                    if (Event.LocationAddress.Contains('%'))// formaat: straatnaam % huisnr % postcode % stad
-                    {
-                        string[] address = Event.LocationAddress.Split('%');
-                        if (address.Length == 4)
-                        {
-                            writer.WriteStartElement("Location");
-                            writer.WriteElementString("streetname", address[0]);
-                            writer.WriteElementString("number", address[1]);
-                            writer.WriteElementString("city", address[3]);
-                            writer.WriteElementString("postalcode", address[2]);
-                            writer.WriteEndElement();
-                        }
-                    }
+                    //if (Event.LocationAddress.Contains('%'))// formaat: straatnaam % huisnr % postcode % stad
+                    //{
+                    //    string[] address = Event.LocationAddress.Split('%');
+                    //    if (address.Length == 4)
+                    //    {
+                    //        writer.WriteStartElement("Location");
+                    //        writer.WriteElementString("streetname", address[0]);
+                    //        writer.WriteElementString("number", address[1]);
+                    //        writer.WriteElementString("city", address[3]);
+                    //        writer.WriteElementString("postalcode", address[2]);
+                    //        writer.WriteEndElement();
+                    //    }
+                    //}
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
                     writer.Flush();
