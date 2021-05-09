@@ -35,6 +35,11 @@ jobs:
       id: docker_build
       uses: docker/build-push-action@v2
       with:
+        context: .
         push: true
         tags: sonergezgen/myreposoner:Canvas_Events
         registry: Docker.io
+        
+    - 
+      name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
