@@ -37,4 +37,4 @@ jobs:
       with:
         push: true
         tags: sonergezgen/myreposoner:Canvas_Events
-        registry: docker.io
+        registry: Docker.io
