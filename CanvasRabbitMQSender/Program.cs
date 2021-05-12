@@ -45,7 +45,7 @@ namespace CanvasRabbitMQSender
             {
                 connection.Open();
 
-                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at, deleted_at FROM public.calendar_events where updated_at > now() - interval '5 second'";
+                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at, deleted_at FROM public.calendar_events  where updated_at > now() - interval '5 second'";
 
                 Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 Event newEvent;
@@ -92,8 +92,7 @@ namespace CanvasRabbitMQSender
                                 reader.GetInt32(7),
                                 reader.GetString(8),
                                 reader.GetDateTime(10),
-                                reader.GetDateTime(11),
-                                deleted
+                                reader.GetDateTime(11)
                                 );
                             Console.WriteLine(newEvent.UpdatedAt.ToString());
                             if (!reader.IsDBNull(9))
@@ -103,6 +102,22 @@ namespace CanvasRabbitMQSender
                             else
                             {
                                 newEvent.UUID = MakeUUID(reader.GetInt32(0));
+                            }
+
+                            if (newEvent.UpdatedAt == newEvent.CreatedAt)
+                            {
+                                newEvent.Header.Method = "CREATE";
+                            }
+                            else
+                            {
+                                if (deleted)
+                                {
+                                    newEvent.Header.Method = "DELETE";
+                                }
+                                else
+                                {
+                                    newEvent.Header.Method = "UPDATE";
+                                }
                             }
                             newEvents.Add(newEvent);
                             Console.WriteLine("Found event: " + newEvent.Title);
@@ -159,9 +174,10 @@ namespace CanvasRabbitMQSender
             newEvents.Clear();
             foreach (var Event in newCourseEvents)
             {
-                string xml = ConvertToXml(Event);
+                //string xml = ConvertToXml(Event);
+                string xml = Xmlcontroller.SerializeToXmlString<Event>(Event);
                 //send it to rabbitMQ
-                var factory = new ConnectionFactory() { HostName = "10.3.17.61"};
+                var factory = new ConnectionFactory() { HostName = "10.3.17.62"};
                 factory.UserName = "guest";
                 factory.Password = "guest";
                 using (var connection = factory.CreateConnection())
@@ -196,22 +212,7 @@ namespace CanvasRabbitMQSender
                     writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", null, "event.xsd");
                     writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
                     writer.WriteStartElement("header");
-
-                    if (Event.UpdatedAt == Event.CreatedAt)
-                    {
-                        writer.WriteElementString("method","CREATE");
-                    }
-                    else 
-                    {
-                        if (Event.Deleted)
-                        {
-                            writer.WriteElementString("method", "DELETE");
-                        }
-                        else
-                        {
-                            writer.WriteElementString("method", "UPDATE");
-                        }
-                    }
+                    writer.WriteElementString("method", Event.Header.Method);
                     writer.WriteElementString("source", "CANVAS");
                     writer.WriteEndElement();
                     writer.WriteElementString("uuid", Event.UUID);

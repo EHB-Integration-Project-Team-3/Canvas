@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace CanvasRabbitMQSender
 {
-    class Xmlcontroller
+    public class Xmlcontroller
     {
         public static string SerializeToXmlString<T>(T data)
         {
@@ -23,7 +23,7 @@ namespace CanvasRabbitMQSender
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                Console.WriteLine(ex);
                 return "";
             }
         }
