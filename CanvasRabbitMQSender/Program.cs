@@ -21,21 +21,17 @@ namespace CanvasRabbitMQSender
         public static void Main()
         {
             SetTimer();
-
             Console.WriteLine("\nPress the Enter key to exit the application...\n");
             Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
             Console.ReadLine();
             aTimer.Stop();
             aTimer.Dispose();
-
             Console.WriteLine("Terminating the application...");
         }
 
         private static void SetTimer()
         {
-            // Create a timer with a two second interval.
             aTimer = new System.Timers.Timer(5000);
-            // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
@@ -48,11 +44,10 @@ namespace CanvasRabbitMQSender
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             {
                 connection.Open();
-                string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
 
                 string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at, deleted_at FROM public.calendar_events where updated_at > now() - interval '5 second'";
 
-                Console.WriteLine(nowMinus5);
+                Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 Event newEvent;
                 using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
                 {
@@ -166,15 +161,13 @@ namespace CanvasRabbitMQSender
             {
                 string xml = ConvertToXml(Event);
                 //send it to rabbitMQ
-                var factory = new ConnectionFactory() { HostName = "10.3.17.62"};
+                var factory = new ConnectionFactory() { HostName = "10.3.17.61"};
                 factory.UserName = "guest";
                 factory.Password = "guest";
                 using (var connection = factory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
-                    var body = Encoding.UTF8.GetBytes(xml);
-
-                    
+                    var body = Encoding.UTF8.GetBytes(xml);                    
                     channel.BasicPublish(exchange: "event-exchange",
                                          routingKey: "",
                                          basicProperties: null,
@@ -198,7 +191,7 @@ namespace CanvasRabbitMQSender
                 {
                     // Build Xml with xw.
 
-                    writer.WriteStartDocument();
+                    writer.WriteProcessingInstruction("xml", "version=\"1.0\" encoding=\"UTF-8\"");
                     writer.WriteStartElement("event");
                     writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", null, "event.xsd");
                     writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
@@ -218,7 +211,7 @@ namespace CanvasRabbitMQSender
                             writer.WriteElementString("method", "UPDATE");
                         }
                     }
-                    writer.WriteElementString("source", "CANVAS ");
+                    writer.WriteElementString("source", "CANVAS");
                     writer.WriteEndElement();
                     writer.WriteElementString("uuid", Event.UUID);
                     writer.WriteElementString("entityVersion", "15");
@@ -256,20 +249,15 @@ namespace CanvasRabbitMQSender
             string uuid;
             uuid = GetUUID();
             string sql = "UPDATE public.calendar_events SET uuid = @uuid where id = @id";
-                using (NpgsqlConnection connection = new NpgsqlConnection(constring))
-                using (NpgsqlCommand command = connection.CreateCommand())
-                {
-
+            using (NpgsqlConnection connection = new NpgsqlConnection(constring))
+            using (NpgsqlCommand command = connection.CreateCommand())
+            {
                 command.Parameters.AddWithValue("@uuid", uuid);
-
                 command.Parameters.AddWithValue("@id", id);
                 command.CommandText = sql;
-
-                    connection.Open();
-
-                    command.ExecuteNonQuery();
-
-                    connection.Close();
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
             }
             return uuid;
         }
@@ -277,21 +265,16 @@ namespace CanvasRabbitMQSender
         {
             string uuid;
             uuid = GetUUID();
-                string sql = "UPDATE public.courses SET muuid = @uuid where uuid = @id";
-                using (NpgsqlConnection connection = new NpgsqlConnection(constring))
-                using (NpgsqlCommand command = connection.CreateCommand())
+            string sql = "UPDATE public.courses SET muuid = @uuid where uuid = @id";
+            using (NpgsqlConnection connection = new NpgsqlConnection(constring))
+            using (NpgsqlCommand command = connection.CreateCommand())
             {
-
                 command.Parameters.AddWithValue("@uuid", uuid);
-
                 command.Parameters.AddWithValue("@id", id);
                 command.CommandText = sql;
-
-                    connection.Open();
-
-                    command.ExecuteNonQuery();
-
-                    connection.Close();
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
             }
             return uuid;
         }
@@ -321,7 +304,7 @@ namespace CanvasRabbitMQSender
             }
             catch (Exception a)
             {
-                Console.WriteLine("Failed to connect to first server");
+                Console.WriteLine("Failed to connect to first server for muuid");
                 Console.WriteLine(a.ToString());
                 try
                 {
@@ -343,7 +326,7 @@ namespace CanvasRabbitMQSender
                 }
                 catch (Exception b)
                 {
-                    Console.WriteLine("Failed to connect to second server");
+                    Console.WriteLine("Failed to connect to second server for muuid");
                     Console.WriteLine(b.ToString());
                     throw;
                 }
