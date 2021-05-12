@@ -127,7 +127,7 @@ namespace CanvasRabbitMQSender
                                 {
                                     if (!reader.IsDBNull(1))
                                     {
-                                        Event.OrganiserId = reader.GetString(1);
+                                        Event.OrganiserId = reader.GetString(1);                                       
                                     }
                                     else
                                     {
@@ -203,6 +203,7 @@ namespace CanvasRabbitMQSender
                     writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", null, "event.xsd");
                     writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
                     writer.WriteStartElement("header");
+
                     if (Event.UpdatedAt == Event.CreatedAt)
                     {
                         writer.WriteElementString("method","CREATE");
@@ -251,7 +252,7 @@ namespace CanvasRabbitMQSender
                 return sw.ToString();
             }
         }
-        public static string MakeUUID(int id)//events
+        public static string MakeUUID(int id) //events
         {
             string uuid;
             uuid = GetUUID();
