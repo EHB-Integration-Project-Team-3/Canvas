@@ -10,11 +10,13 @@ using RabbitMQ.Client;
 using MySql.Data.MySqlClient;
 using System.Net.Http;
 using System.Threading.Tasks;
+using CanvasRabbitMQSender.UserRepo;
 
 namespace CanvasRabbitMQSender
 {
     class Program
     {
+        public static List<User> users = new List<User>();
         private static string constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
         private static Timer timerSendEvents;
         private static Timer timerHeartbeat;
@@ -23,6 +25,20 @@ namespace CanvasRabbitMQSender
 
         public static void Main()
         {
+            //send User
+            GetUserFromDB.SetUserTimer();
+            Console.WriteLine("-------------USER--------------------");
+            Console.WriteLine("\nPress the Enter key to exit the application...\n");
+            Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
+            Console.ReadLine();
+            GetUserFromDB.usertimer.Stop();
+            GetUserFromDB.usertimer.Dispose();
+
+            Console.WriteLine("Terminating the application...");
+            Console.WriteLine("-------------USER--------------------");
+
+
+
             //send events
             timerSendEvents = new System.Timers.Timer(5000);
             timerSendEvents.Elapsed += TimedEventSendEvent;

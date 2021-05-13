@@ -34,4 +34,4 @@ namespace CanvasRabbitMQSender
         public string Source { get; set; }
     }
 }
-}
+
