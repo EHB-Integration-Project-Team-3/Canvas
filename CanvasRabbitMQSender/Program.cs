@@ -8,36 +8,84 @@ using System.Timers;
 using System.Xml;
 using RabbitMQ.Client;
 using MySql.Data.MySqlClient;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace CanvasRabbitMQSender
 {
     class Program
     {
         private static string constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
-        private static Timer aTimer;
+        private static Timer timerSendEvents;
+        private static Timer timerHeartbeat;
         private static List<Event> newEvents = new List<Event>();
         private static List<Event> newCourseEvents = new List<Event>();
 
         public static void Main()
         {
-            SetTimer();
+            //send events
+            timerSendEvents = new System.Timers.Timer(5000);
+            timerSendEvents.Elapsed += TimedEventSendEvent;
+            timerSendEvents.AutoReset = true;
+            timerSendEvents.Enabled = true;
+            //heartbeat
+            timerHeartbeat = new System.Timers.Timer(1000);
+            timerHeartbeat.Elapsed += TimedHeartBeat;
+            timerHeartbeat.AutoReset = true;
+            timerHeartbeat.Enabled = true;
             Console.WriteLine("\nPress the Enter key to exit the application...\n");
             Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
             Console.ReadLine();
-            aTimer.Stop();
-            aTimer.Dispose();
+            timerSendEvents.Stop();
+            timerSendEvents.Dispose();
+            timerHeartbeat.Stop();
+            timerHeartbeat.Dispose();
             Console.WriteLine("Terminating the application...");
         }
-
-        private static void SetTimer()
+        public async static void TimedHeartBeat(Object source, ElapsedEventArgs arg)
         {
-            aTimer = new System.Timers.Timer(5000);
-            aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = true;
-            aTimer.Enabled = true;
+            Heartbeat heartbeat = new Heartbeat();
+            //string xml = ConvertToXml(Event);
+            heartbeat.Header.Status = await CheckIfOnline();
+            string xml = Xmlcontroller.SerializeToXmlString<Heartbeat>(heartbeat);
+            //send it to rabbitMQ
+            var factory = new ConnectionFactory() { HostName = "10.3.17.62" };
+            factory.UserName = "guest";
+            factory.Password = "guest";
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "to-monitoring_heartbeat-queue",
+                         durable: false,
+                         exclusive: false,
+                         autoDelete: false,
+                         arguments: null);
+                var body = Encoding.UTF8.GetBytes(xml);
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "",
+                                     basicProperties: null,
+                                     body: body);
+                Console.WriteLine(" [x] Sent {0}", xml);
+            }
+            newCourseEvents.Clear();
+            Console.WriteLine("Complete");
         }
 
-        private static void OnTimedEvent(Object source, ElapsedEventArgs arg)
+        public async static Task<string> CheckIfOnline()
+        {
+            HttpClient client = new HttpClient();
+            var checkingResponse = await client.GetAsync("http://10.3.17.67:3000/");
+            if (!checkingResponse.IsSuccessStatusCode)
+            {
+                return "ERROR";
+            }
+            else
+            {
+                return "ONLINE";
+            }
+        }
+        public static void TimedEventSendEvent(Object source, ElapsedEventArgs arg)
         {
             //try
             //{

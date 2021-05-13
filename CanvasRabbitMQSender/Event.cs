@@ -22,18 +22,18 @@ namespace CanvasRabbitMQSender
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
             EntityVersion = 15;
-            Header = new Header();
+            Header = new HeaderEvent();
             Header.Source = "CANVAS";
         }
         public Event()
         {
             EntityVersion = 15;
-            Header = new Header();
+            Header = new HeaderEvent();
             Header.Source = "CANVAS";
         }
 
         [XmlElement("header")]
-        public Header Header { get; set; }
+        public HeaderEvent Header { get; set; }
         [XmlIgnore]
         public int Id { get; set; }
         [XmlElement("uuid")]
@@ -69,7 +69,7 @@ namespace CanvasRabbitMQSender
 
 
     [Serializable]
-    public class Header
+    public class HeaderEvent
     {
         
         [XmlElement("method")]
