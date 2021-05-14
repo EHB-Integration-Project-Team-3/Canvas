@@ -73,6 +73,7 @@ namespace CanvasRabbitMQSender.UserRepo
             foreach (var user in users)
             {
                 string xml = UserConvertToXml.convertToXml(user);
+                //string xml = Xmlcontroller.SerializeToXmlString(user);
                 var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
                 factory.UserName = "guest";
                 factory.Password = "guest";
