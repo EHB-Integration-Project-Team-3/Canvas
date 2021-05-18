@@ -42,25 +42,29 @@ namespace CanvasRabbitMQSender.UserRepo
                     user = new User(
                                 dr.GetInt32(0),
                                 dr.GetString(dr.GetOrdinal("sortable_name")),
-                                dr.GetString(1) + "@ehb.be",
+                                dr.GetString(1) + "@ipwt3.onmicrosoft.com",
                                 "lecturer",
                                 dr.GetDateTime(4).AddHours(2),
                                 Convert.ToDateTime(dr["updated_at"]).AddHours(2),
                                 false);
 
-                    
-                   /* if (!dr.IsDBNull(dr.GetOrdinal("MUUID")))
-                    {
-                        user.UUID = dr["MUUID"].ToString();
-                    }
-                    else
-                    {
-                        user.UUID = Uuid.MakeUserUUID(dr.GetInt32(0));
-                    }*/
-                   
-                    
+
+
+                     //string mmud = dr.GetString(dr.GetOrdinal("muuid"));
+
+                    /* if (!dr.IsDBNull(dr.GetOrdinal("muuid")))
+                     {
+                         user.UUID = dr["muuid"].ToString();
+                     }
+                     else
+                     {
+                         user.UUID = Uuid.MakeUserUUID(dr.GetInt32(0));
+                     } */
+
+
 
                     user.UUID = Uuid.GetUUID();
+                    //Console.WriteLine("*********************MUUID IS: " + mmud +"*************************");
                     users.Add(user);
                     Console.WriteLine(user.UUID);
                 }

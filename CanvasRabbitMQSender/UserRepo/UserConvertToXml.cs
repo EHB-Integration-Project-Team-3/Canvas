@@ -37,7 +37,7 @@ namespace CanvasRabbitMQSender.UserRepo
                             writer.WriteElementString("method", "UPDATE");
                         }
                     }
-                    writer.WriteElementString("source", "CANVAS ");
+                    writer.WriteElementString("source", "CANVAS");
                     writer.WriteEndElement();
                     writer.WriteElementString("uuid", user.UUID);
                     writer.WriteElementString("entityVersion", "12");
