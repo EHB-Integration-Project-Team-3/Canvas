@@ -8,9 +8,9 @@ namespace CanvasRabbitMQReceiver.UserRepo
     [XmlRoot(ElementName = "user")]
     class User
     {
-        
+
         public User() { }
-        
+
         public User(int id, string sortable_name, string email, string role, DateTime createdAt, DateTime updatedAt, bool deleted)
         {
             Id = id;

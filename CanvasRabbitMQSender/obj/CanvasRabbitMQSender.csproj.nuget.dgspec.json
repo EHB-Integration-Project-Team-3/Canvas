@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {}
+    "C:\\Users\\Admin\\source\\repos\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {}
   },
   "projects": {
-    "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {
+    "C:\\Users\\Admin\\source\\repos\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
+        "projectUniqueName": "C:\\Users\\Admin\\source\\repos\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
         "projectName": "CanvasRabbitMQSender",
-        "projectPath": "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
-        "packagesPath": "C:\\Users\\soner\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\obj\\",
+        "projectPath": "C:\\Users\\Admin\\source\\repos\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Admin\\source\\repos\\Canvas\\CanvasRabbitMQSender\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\soner\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -72,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.103\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.202\\RuntimeIdentifierGraph.json"
         }
       }
     }

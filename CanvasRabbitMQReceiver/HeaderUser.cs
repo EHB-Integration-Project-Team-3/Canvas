@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace CanvasRabbitMQReceiver.UserRepo
@@ -15,3 +13,4 @@ namespace CanvasRabbitMQReceiver.UserRepo
         public string Source { get; set; }
     }
 }
+

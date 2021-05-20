@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Timers;
 
-namespace CanvasRabbitMQSender.UserRepo
+namespace CanvasRabbitMQReceiver.UserRepo
 {
     class GetUserFromDB
     {

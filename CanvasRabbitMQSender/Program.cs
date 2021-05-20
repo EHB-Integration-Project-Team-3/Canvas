@@ -10,9 +10,9 @@ using RabbitMQ.Client;
 using MySql.Data.MySqlClient;
 using System.Net.Http;
 using System.Threading.Tasks;
-using CanvasRabbitMQSender.UserRepo;
+using CanvasRabbitMQReceiver.UserRepo;
 
-namespace CanvasRabbitMQSender
+namespace CanvasRabbitMQReceiver
 {
     class Program
     {

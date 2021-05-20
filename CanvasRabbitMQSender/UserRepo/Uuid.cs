@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CanvasRabbitMQSender.UserRepo
+namespace CanvasRabbitMQReceiver.UserRepo
 {
     class Uuid
     {

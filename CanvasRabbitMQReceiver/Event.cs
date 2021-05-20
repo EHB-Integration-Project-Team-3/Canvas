@@ -25,12 +25,7 @@ namespace CanvasRabbitMQReceiver
             Header = new HeaderEvent();
             Header.Source = "CANVAS";
         }
-        public Event()
-        {
-            EntityVersion = 15;
-            Header = new HeaderEvent();
-            Header.Source = "CANVAS";
-        }
+        
 
         [XmlElement("header")]
         public HeaderEvent Header { get; set; }
