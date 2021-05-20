@@ -30,7 +30,7 @@ namespace CanvasRabbitMQSender.UserRepo
             {
                 connection.Open();
                 string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
-                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at FROM public.users where updated_at > now() - interval '5 second'";
+                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at, muuid FROM public.users where updated_at > now() - interval '5 second'";
                 Console.WriteLine(nowMinus5);
 
                 User user;
@@ -49,22 +49,18 @@ namespace CanvasRabbitMQSender.UserRepo
                                 false);
 
 
-
-                     //string mmud = dr.GetString(dr.GetOrdinal("muuid"));
-
-                    /* if (!dr.IsDBNull(dr.GetOrdinal("muuid")))
-                     {
-                         user.UUID = dr["muuid"].ToString();
-                     }
-                     else
-                     {
+                      
+                    //Update
+                      if (!dr.IsDBNull(dr.GetOrdinal("muuid")))
+                      {
+                        user.UUID = dr.GetString(dr.GetOrdinal("muuid"));
+                      }
+                      else
+                      {
                          user.UUID = Uuid.MakeUserUUID(dr.GetInt32(0));
-                     } */
+                      } 
 
-
-
-                    user.UUID = Uuid.GetUUID();
-                    //Console.WriteLine("*********************MUUID IS: " + mmud +"*************************");
+                    //user.UUID = Uuid.GetUUID();
                     users.Add(user);
                     Console.WriteLine(user.UUID);
                 }
