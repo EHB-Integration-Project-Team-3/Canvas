@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Schema;
 
 namespace CanvasRabbitMQSender.UserRepo
 {
@@ -12,6 +14,7 @@ namespace CanvasRabbitMQSender.UserRepo
         {
             using (StringWriter stringWriter = new StringWriter())
             {
+                bool validationXsd = false;
                 XmlWriterSettings writersettings = new XmlWriterSettings();
                 writersettings.Indent = true;
                 writersettings.Encoding = Encoding.UTF8;
@@ -30,7 +33,7 @@ namespace CanvasRabbitMQSender.UserRepo
                     {
                         if (user.Deleted)
                         {
-                            writer.WriteElementString("methoded", "DELETE");
+                            writer.WriteElementString("method", "DELETE");
                         }
                         else
                         {
@@ -46,14 +49,15 @@ namespace CanvasRabbitMQSender.UserRepo
                     writer.WriteElementString("lastName", firstname);
                     writer.WriteElementString("firstName", lastname);
                     string email = user.Email.Replace(" ", ".");
-                    writer.WriteElementString("emailAddress", email);
-                    writer.WriteElementString("role", user.Role);
+                    //writer.WriteElementString("emailAddress", email);
+                    //writer.WriteElementString("role", user.Role);
 
                     writer.WriteEndElement();
                     writer.WriteEndDocument();
                     writer.Flush();
                     writer.Close();
                 }
+
                 return stringWriter.ToString();
             }
         }
