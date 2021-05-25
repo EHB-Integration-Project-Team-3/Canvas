@@ -49,8 +49,8 @@ namespace CanvasRabbitMQSender.UserRepo
                     writer.WriteElementString("lastName", firstname);
                     writer.WriteElementString("firstName", lastname);
                     string email = user.Email.Replace(" ", ".");
-                    //writer.WriteElementString("emailAddress", email);
-                    //writer.WriteElementString("role", user.Role);
+                    writer.WriteElementString("emailAddress", email);
+                    writer.WriteElementString("role", user.Role);
 
                     writer.WriteEndElement();
                     writer.WriteEndDocument();

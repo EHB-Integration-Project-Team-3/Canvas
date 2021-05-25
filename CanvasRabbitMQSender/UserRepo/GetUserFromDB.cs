@@ -94,7 +94,7 @@ namespace CanvasRabbitMQSender.UserRepo
                 XmlSchemaSet xmlSchema = new XmlSchemaSet();
 
                 
-                xmlSchema.Add("user.xsd", @"c:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator.xsd");
+                xmlSchema.Add("", @"C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator.xsd");
                 bool validationErrors = false;
                 XDocument doc = XDocument.Parse(xml);
 
@@ -110,6 +110,7 @@ namespace CanvasRabbitMQSender.UserRepo
                 }
                 else
                 {
+                    Console.WriteLine("XSD VALIDATION Success");
                     var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
                     factory.UserName = "guest";
                     factory.Password = "guest";
