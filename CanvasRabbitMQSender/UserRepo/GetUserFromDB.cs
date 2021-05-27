@@ -101,7 +101,7 @@ namespace CanvasRabbitMQSender.UserRepo
 
                 doc.Validate(xmlSchema, (sender, args) =>
                 {
-                    Console.WriteLine("Error Message: " + args.Message);
+                    Console.WriteLine("Error Message: " + args.Message); 
                     validationErrors = true;
                 });
 
