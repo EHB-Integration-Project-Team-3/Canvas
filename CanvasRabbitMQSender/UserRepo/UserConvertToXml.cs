@@ -12,9 +12,11 @@ namespace CanvasRabbitMQSender.UserRepo
     {
         public static string convertToXml(User user)
         {
+
+
             using (StringWriter stringWriter = new StringWriter())
             {
-                bool validationXsd = false;
+                
                 XmlWriterSettings writersettings = new XmlWriterSettings();
                 writersettings.Indent = true;
                 writersettings.Encoding = Encoding.UTF8;
@@ -43,6 +45,9 @@ namespace CanvasRabbitMQSender.UserRepo
                     writer.WriteElementString("source", "CANVAS");
                     writer.WriteEndElement();
                     writer.WriteElementString("uuid", user.UUID);
+
+
+
                     writer.WriteElementString("entityVersion", "12");
                     string firstname = user.Sortable_name.Substring(0, user.Sortable_name.IndexOf(",") + 1).Replace(",", "");
                     string lastname = user.Sortable_name.Substring(user.Sortable_name.IndexOf(",") + 1).Replace(" ", "");

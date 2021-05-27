@@ -93,8 +93,8 @@ namespace CanvasRabbitMQSender.UserRepo
                 //XSD Validatation
                 XmlSchemaSet xmlSchema = new XmlSchemaSet();
 
-                
-                xmlSchema.Add("", @"C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator.xsd");
+
+                xmlSchema.Add("user.xsd", @"C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator_SendUser.xsd");
                 bool validationErrors = false;
                 XDocument doc = XDocument.Parse(xml);
 
@@ -110,7 +110,7 @@ namespace CanvasRabbitMQSender.UserRepo
                 }
                 else
                 {
-                    Console.WriteLine("XSD VALIDATION Success");
+                    Console.WriteLine("XSD VALIDATION SUCCESS");
                     var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
                     factory.UserName = "guest";
                     factory.Password = "guest";
@@ -127,15 +127,12 @@ namespace CanvasRabbitMQSender.UserRepo
                         Console.WriteLine(" [x] Sent {0}", xml);
                     }
                 }
-
-                
-                
                 users.Clear();
                 Console.WriteLine("Complete");
 
                 Console.ReadLine();
             }
         }
-       
+
     }
 }
