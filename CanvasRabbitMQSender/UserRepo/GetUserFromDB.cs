@@ -31,6 +31,7 @@ namespace CanvasRabbitMQSender.UserRepo
 
         public static void GetAndPushUser(Object source, ElapsedEventArgs e)
         {
+            
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionString: constring))
             {
                 connection.Open();
@@ -92,10 +93,10 @@ namespace CanvasRabbitMQSender.UserRepo
 
                 //XSD Validatation
                 XmlSchemaSet xmlSchema = new XmlSchemaSet();
+                xmlSchema.Add("", @"C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator_SendUser.xsd");
 
-
-                xmlSchema.Add("user.xsd", @"C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator_SendUser.xsd");
                 bool validationErrors = false;
+
                 XDocument doc = XDocument.Parse(xml);
 
                 doc.Validate(xmlSchema, (sender, args) =>
@@ -108,7 +109,7 @@ namespace CanvasRabbitMQSender.UserRepo
                 {
                     Console.WriteLine("XSD VALIDATION FAILED");
                 }
-                else
+                else 
                 {
                     Console.WriteLine("XSD VALIDATION SUCCESS");
                     var factory = new ConnectionFactory() { HostName = "10.3.17.61" };

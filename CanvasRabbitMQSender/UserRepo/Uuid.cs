@@ -104,7 +104,6 @@ namespace CanvasRabbitMQSender.UserRepo
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             using (NpgsqlCommand command = connection.CreateCommand())
             {
-
                 command.Parameters.AddWithValue("@uuid", uuid);
 
                 command.Parameters.AddWithValue("@id", id);
