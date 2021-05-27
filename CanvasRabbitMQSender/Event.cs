@@ -38,7 +38,6 @@ namespace CanvasRabbitMQSender
         public int Id { get; set; }
         [XmlElement("uuid")]
         public string UUID { get; set; }
-
         [XmlElement("entityVersion")]
         public int EntityVersion { get; set; }
         [XmlElement("title")]
