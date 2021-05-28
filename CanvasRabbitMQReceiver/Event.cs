@@ -25,7 +25,7 @@ namespace CanvasRabbitMQReceiver
             Header = new HeaderEvent();
             Header.Source = "CANVAS";
         }
-        
+        public Event() { }
 
         [XmlElement("header")]
         public HeaderEvent Header { get; set; }

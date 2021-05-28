@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace CanvasRabbitMQReceiver.UserRepo
+namespace CanvasRabbitMQReceiver
 {
     [Serializable]
-    class HeaderUser
+    public class HeaderUser
     {
         [XmlElement("method")]
         public string Method { get; set; }

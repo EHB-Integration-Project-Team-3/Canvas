@@ -35,6 +35,7 @@ namespace CanvasRabbitMQReceiver
                 string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
                 if (xml.StartsWith(_byteOrderMarkUtf8))
                     xml = xml.Remove(0, _byteOrderMarkUtf8.Length);
+                xml=Validate(xml);
 
                 XmlSerializer serializer = new XmlSerializer(typeof(T));
                 StringReader reader = new StringReader(xml);
@@ -45,6 +46,21 @@ namespace CanvasRabbitMQReceiver
                 Console.WriteLine(ex);
                 return default;
             }
+        }
+        private static string Validate(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return xml;
+
+            try
+            {
+                var index = xml.IndexOf('<');
+                if (index > 0)
+                    xml = xml.Substring(index);
+            }
+            catch { }
+
+            return xml;
         }
     }
 }

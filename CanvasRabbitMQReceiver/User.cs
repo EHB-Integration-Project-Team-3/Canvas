@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace CanvasRabbitMQReceiver.UserRepo
+namespace CanvasRabbitMQReceiver
 {
     [XmlRoot(ElementName = "user")]
-    class User
+    public class User
     {
 
         public User() { }
