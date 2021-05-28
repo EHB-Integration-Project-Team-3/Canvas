@@ -25,6 +25,8 @@ namespace CanvasRabbitMQSender
 
         public static void Main()
         {
+            string test = "1ff45812-bfe9-11eb-b876-00155d110504";
+            CheckUpdateEntityVersion(test, 2);
             //send events
             timerSendEvents = new System.Timers.Timer(5000);
             timerSendEvents.Elapsed += TimedEventSendEvent;
@@ -105,7 +107,7 @@ namespace CanvasRabbitMQSender
                             string description = "";
                             string locationAddress = "";
                             string locationName = "";
-                            int entityversion = 0;
+                            int entityversion = 1;
                             bool deleted = false;
 
                             if (!reader.IsDBNull(1))
@@ -128,10 +130,6 @@ namespace CanvasRabbitMQSender
                             {
                                 deleted = true;
                             }
-                            if (!reader.IsDBNull(13))
-                            {
-                                entityversion = reader.GetInt32(14);
-                            }
                             newEvent = new Event(
                                 reader.GetInt32(0),
                                 title,
@@ -145,7 +143,7 @@ namespace CanvasRabbitMQSender
                                 reader.GetDateTime(10),
                                 reader.GetDateTime(11),
                                 reader.GetInt32(13),
-                                entityversion
+                                reader.GetInt32(14)
                                 );
                             Console.WriteLine(newEvent.UpdatedAt.ToString());
                             if (!reader.IsDBNull(9))
@@ -218,26 +216,26 @@ namespace CanvasRabbitMQSender
                 {
                     continue;
                 }
-                if (true || !CheckUpdateEntityVersion(Event.UUID, Event.EntityVersion))//MUUID not working
+                if (Event.CreatedAt == Event.UpdatedAt || CheckUpdateEntityVersion(Event.UUID, Event.EntityVersion))//MUUID not working
                 {
-                    continue;
-                }
-                //string xml = ConvertToXml(Event);
-                //send it to rabbitMQ
-                var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
-                factory.UserName = "guest";
-                factory.Password = "guest";
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel())
-                {
-                    var body = Encoding.UTF8.GetBytes(xml);
-                    channel.BasicPublish(exchange: "event-exchange",
-                                         routingKey: "",
-                                         basicProperties: null,
-                                         body: body);
-                    Console.WriteLine(" [x] Sent {0}", xml);
+                    //string xml = ConvertToXml(Event);
+                    //send it to rabbitMQ
+                    var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
+                    factory.UserName = "guest";
+                    factory.Password = "guest";
+                    using (var connection = factory.CreateConnection())
+                    using (var channel = connection.CreateModel())
+                    {
+                        var body = Encoding.UTF8.GetBytes(xml);
+                        channel.BasicPublish(exchange: "event-exchange",
+                                             routingKey: "",
+                                             basicProperties: null,
+                                             body: body);
+                        Console.WriteLine(" [x] Sent {0}", xml);
+                    }
                 }
             }
+            
             newCourseEvents.Clear();
         }
 
@@ -295,7 +293,7 @@ namespace CanvasRabbitMQSender
         public static string MakeUUID(int id) //events
         {
             string uuid;
-            uuid = GetUUID();
+            uuid = GetUUID("event", id);
             string sql = "UPDATE public.calendar_events SET uuid = @uuid where id = @id";
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             using (NpgsqlCommand command = connection.CreateCommand())
@@ -309,10 +307,10 @@ namespace CanvasRabbitMQSender
             }
             return uuid;
         }
-        public static string MakeUserUUID(int id)//courses
+        public static string MakeUserUUID(int id)//users
         {
             string uuid;
-            uuid = GetUUID();
+            uuid = GetUUID("user", id);
             string sql = "UPDATE public.users SET muuid = @uuid where id = @id";
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             using (NpgsqlCommand command = connection.CreateCommand())
@@ -326,12 +324,12 @@ namespace CanvasRabbitMQSender
             }
             return uuid;
         }
-        public static string GetUUID()
+        public static string GetUUID(string type, int id)
         {
-            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid;";
-            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid;";
+            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid;  database=masteruuid;";
+            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid;  database=masteruuid;";
             string sql = "SELECT UUID()";
-            string sql2 = "INSERT INTO masteruuid.master (UUID,Source_EntityId,EntityType,Source)VALUES(BIN(@uuid),'0','TestEntity','Canvas'); ";
+            string sql2 = "INSERT INTO master (UUID,Source_EntityId,EntityType,Source)VALUES(UUID_TO_BIN(@uuid),'@id','@type','Canvas'); ";
             string uuid = "";
 
             try
@@ -352,6 +350,8 @@ namespace CanvasRabbitMQSender
                     using (MySqlCommand command = connection.CreateCommand())
                     {
                         command.Parameters.AddWithValue("@uuid", uuid);
+                        command.Parameters.AddWithValue("@type", type);
+                        command.Parameters.AddWithValue("@id", id);
                         command.CommandText = sql2;
                         command.ExecuteNonQuery();
                     }
@@ -399,16 +399,16 @@ namespace CanvasRabbitMQSender
 
         public static bool CheckUpdateEntityVersion(string uuid, int entityversion)
         {
-            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid;";
-            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid;";
-            string sql = "update masteruuid.master set EntityVersion = @entityversion " +
+            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid; database=masteruuid;";
+            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid; database=masteruuid;";
+            string sql = "update master set EntityVersion = @entityversion " +
                 "where Source = @MyService and " +
                 "EntityVersion = @entityversion - 1 and " +
-                "UUID = BIN(@uuid) and " +
-                "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = BIN(@uuid)) or " +
-                "(select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = BIN(@uuid)) < @uuid) and " +
+                "UUID = UUID_TO_BIN(@uuid) and " +
+                "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = UUID_TO_BIN(@uuid)) or " +
+                "(select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = UUID_TO_BIN(@uuid)) < @entityversion) and " +
                 "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = BIN(@uuid)) or" +
-                "(select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = BIN(@uuid)) < @uuid);";
+                "(select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = UUID_TO_BIN(@uuid)) < @entityversion);";
             bool edited = false;
             try
             {
