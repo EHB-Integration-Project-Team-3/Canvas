@@ -1,26 +1,21 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Sander\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {}
+    "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Sander\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {
+    "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Sander\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
+        "projectUniqueName": "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
         "projectName": "CanvasRabbitMQSender",
-        "projectPath": "C:\\Users\\Sander\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
-        "packagesPath": "C:\\Users\\Sander\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Sander\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\obj\\",
+        "projectPath": "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\CanvasRabbitMQSender.csproj",
+        "packagesPath": "C:\\Users\\soner\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\soner\\Source\\Repos\\EHB-Integration-Project-Team-3\\Canvas\\CanvasRabbitMQSender\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "D:\\Microsoft\\Xamarin\\NuGet\\",
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Sander\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\soner\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"
@@ -31,6 +26,7 @@
         },
         "frameworks": {
           "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
           }
         },
@@ -42,6 +38,7 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
           "dependencies": {
             "MySql.Data": {
               "target": "Package",
@@ -75,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.403\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.103\\RuntimeIdentifierGraph.json"
         }
       }
     }
