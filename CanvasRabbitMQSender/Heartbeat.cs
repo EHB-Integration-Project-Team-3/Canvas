@@ -5,6 +5,7 @@ using System.Xml.Serialization;
 
 namespace CanvasRabbitMQSender
 {
+    [XmlRoot(ElementName = "heartbeat")]
     public class Heartbeat
     {
         public Heartbeat()

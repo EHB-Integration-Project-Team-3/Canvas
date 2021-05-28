@@ -10,6 +10,8 @@ using RabbitMQ.Client;
 using MySql.Data.MySqlClient;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml.Schema;
+using System.Xml.Linq;
 
 namespace CanvasRabbitMQSender
 {
@@ -42,6 +44,7 @@ namespace CanvasRabbitMQSender
             timerHeartbeat.Dispose();
             Console.WriteLine("Terminating the application...");
         }
+        
         public async static void TimedHeartBeat(Object source, ElapsedEventArgs arg)
         {
             Heartbeat heartbeat = new Heartbeat();
@@ -56,15 +59,11 @@ namespace CanvasRabbitMQSender
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.QueueDeclare(queue: "to-monitoring_heartbeat-queue",
-                         durable: true,
-                         exclusive: false,
-                         autoDelete: false,
-                         arguments: null);
                 var body = Encoding.UTF8.GetBytes(xml);
 
-                channel.BasicPublish(exchange: "",
-                                     routingKey: "",
+                channel.BasicPublish(
+                                     exchange: "",
+                                     routingKey: "to-monitoring_heartbeat-queue",
                                      basicProperties: null,
                                      body: body);
                 Console.WriteLine(" [x] Sent {0}", xml);
@@ -94,7 +93,7 @@ namespace CanvasRabbitMQSender
             {
                 connection.Open();
 
-                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at, deleted_at, user_id FROM public.calendar_events  where updated_at > now() - interval '5 second'";
+                string sql = "SELECT id, title, description, location_name, location_address, start_at, end_at, context_id, context_type, uuid, created_at, updated_at, deleted_at, user_id, entityversion FROM public.calendar_events  where updated_at > now() - interval '5 second'";
                 Event newEvent;
                 using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
                 {
@@ -106,6 +105,7 @@ namespace CanvasRabbitMQSender
                             string description = "";
                             string locationAddress = "";
                             string locationName = "";
+                            int entityversion = 0;
                             bool deleted = false;
 
                             if (!reader.IsDBNull(1))
@@ -128,6 +128,10 @@ namespace CanvasRabbitMQSender
                             {
                                 deleted = true;
                             }
+                            if (!reader.IsDBNull(13))
+                            {
+                                entityversion = reader.GetInt32(14);
+                            }
                             newEvent = new Event(
                                 reader.GetInt32(0),
                                 title,
@@ -140,7 +144,8 @@ namespace CanvasRabbitMQSender
                                 reader.GetString(8),
                                 reader.GetDateTime(10),
                                 reader.GetDateTime(11),
-                                reader.GetInt32(13)
+                                reader.GetInt32(13),
+                                entityversion
                                 );
                             Console.WriteLine(newEvent.UpdatedAt.ToString());
                             if (!reader.IsDBNull(9))
@@ -174,7 +179,7 @@ namespace CanvasRabbitMQSender
                 }
                 foreach (var Event in newEvents)
                 {
-                    if (Event.ContextType.ToLower() == "course" || Event.ContextType.ToLower() == "CourseSection" || Event.ContextType.ToLower() == "Group") 
+                    if (Event.ContextType.ToLower() == "course" || Event.ContextType.ToLower() == "CourseSection" || Event.ContextType.ToLower() == "Group")
                     {
                         //sql = "SELECT uuid, muuid FROM public.courses where id = " + (Event.ContextId.ToString());
                         sql = "SELECT id, muuid FROM public.users where id = " + (Event.User_id.ToString());
@@ -186,7 +191,7 @@ namespace CanvasRabbitMQSender
                                 {
                                     if (!reader.IsDBNull(1))
                                     {
-                                        Event.OrganiserId = reader.GetString(1);                                       
+                                        Event.OrganiserId = reader.GetString(1);
                                     }
                                     else
                                     {
@@ -208,16 +213,24 @@ namespace CanvasRabbitMQSender
             newEvents.Clear();
             foreach (var Event in newCourseEvents)
             {
-                //string xml = ConvertToXml(Event);
                 string xml = XmlController.SerializeToXmlString<Event>(Event);
+                if (XSDValidatie(xml, "event.xsd"))
+                {
+                    continue;
+                }
+                if (true || !CheckUpdateEntityVersion(Event.UUID, Event.EntityVersion))//MUUID not working
+                {
+                    continue;
+                }
+                //string xml = ConvertToXml(Event);
                 //send it to rabbitMQ
-                var factory = new ConnectionFactory() { HostName = "10.3.17.61"};
+                var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
                 factory.UserName = "guest";
                 factory.Password = "guest";
                 using (var connection = factory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
-                    var body = Encoding.UTF8.GetBytes(xml);                    
+                    var body = Encoding.UTF8.GetBytes(xml);
                     channel.BasicPublish(exchange: "event-exchange",
                                          routingKey: "",
                                          basicProperties: null,
@@ -318,7 +331,9 @@ namespace CanvasRabbitMQSender
             string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid;";
             string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid;";
             string sql = "SELECT UUID()";
+            string sql2 = "INSERT INTO masteruuid.master (UUID,Source_EntityId,EntityType,Source)VALUES(BIN(@uuid),'0','TestEntity','Canvas'); ";
             string uuid = "";
+
             try
             {
                 using (MySqlConnection connection = new MySqlConnection(constring1))
@@ -333,6 +348,12 @@ namespace CanvasRabbitMQSender
                                 uuid = reader.GetString(0);
                             }
                         }
+                    }
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.Parameters.AddWithValue("@uuid", uuid);
+                        command.CommandText = sql2;
+                        command.ExecuteNonQuery();
                     }
                     connection.Close();
                 }
@@ -356,6 +377,12 @@ namespace CanvasRabbitMQSender
                                 }
                             }
                         }
+                            using (MySqlCommand command = connection.CreateCommand())
+                            {
+                                command.Parameters.AddWithValue("@uuid", uuid);
+                                command.CommandText = sql2;
+                                command.ExecuteNonQuery();
+                            }
                         connection.Close();
                     }
                 }
@@ -368,6 +395,87 @@ namespace CanvasRabbitMQSender
                 throw;
             }
             return uuid;
+        }
+
+        public static bool CheckUpdateEntityVersion(string uuid, int entityversion)
+        {
+            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid;";
+            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid;";
+            string sql = "update masteruuid.master set EntityVersion = @entityversion " +
+                "where Source = @MyService and " +
+                "EntityVersion = @entityversion - 1 and " +
+                "UUID = BIN(@uuid) and " +
+                "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = BIN(@uuid)) or " +
+                "(select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = BIN(@uuid)) < @uuid) and " +
+                "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = BIN(@uuid)) or" +
+                "(select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = BIN(@uuid)) < @uuid);";
+            bool edited = false;
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(constring1))
+                {
+                    connection.Open();
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.Parameters.AddWithValue("@entityversion", entityversion);
+                        command.Parameters.AddWithValue("@uuid", uuid);
+                        command.Parameters.AddWithValue("@MyService", "Canvas");
+                        command.Parameters.AddWithValue("@ServiceX", "Frontend");
+                        command.Parameters.AddWithValue("@Servicey", "Planning");
+                        command.CommandText = sql;
+                        int editeds = command.ExecuteNonQuery();
+                        edited = command.ExecuteNonQuery() == 1;
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception a)
+            {
+                Console.WriteLine("Failed to connect to first server for muuid");
+                Console.WriteLine(a.ToString());
+                try
+                {
+                    using (MySqlConnection connection = new MySqlConnection(constring2))
+                    {
+                        connection.Open();
+                        using (MySqlCommand command = connection.CreateCommand())
+                        {
+                            command.Parameters.AddWithValue("@entityversion", entityversion);
+                            command.Parameters.AddWithValue("@uuid", uuid);
+                            command.Parameters.AddWithValue("@MyService", "Canvas");
+                            command.Parameters.AddWithValue("@ServiceX", "Frontend");
+                            command.Parameters.AddWithValue("@Servicey", "Planning");
+                            command.CommandText = sql;
+                            edited = command.ExecuteNonQuery() == 1;
+                        }
+                        connection.Close();
+                    }
+                }
+                catch (Exception b)
+                {
+                    Console.WriteLine("Failed to connect to second server for muuid");
+                    Console.WriteLine(b.ToString());
+                    throw;
+                }
+                throw;
+            }
+            return edited;
+        }
+        public static bool XSDValidatie(string xml, string xsd)
+        {
+            XmlSchemaSet xmlSchema = new XmlSchemaSet();
+            xmlSchema.Add("", Environment.CurrentDirectory + "/" + xsd);
+
+            bool validationErrors = false;
+
+            XDocument doc = XDocument.Parse(xml);
+
+            doc.Validate(xmlSchema, (sender, args) =>
+            {
+                Console.WriteLine("Error Message: " + args.Message);
+                validationErrors = true;
+            });
+            return validationErrors;
         }
     }
 }

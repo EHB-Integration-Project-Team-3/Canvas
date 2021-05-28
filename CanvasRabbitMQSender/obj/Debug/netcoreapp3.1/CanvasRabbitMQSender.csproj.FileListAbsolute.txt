@@ -63,3 +63,7 @@ C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitM
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.csproj.CoreCompileInputs.cache
+C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\attendance.xsd
+C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\event.xsd
+C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\heartbeat.xsd
+C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\user.xsd
