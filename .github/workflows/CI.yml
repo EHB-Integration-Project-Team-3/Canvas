@@ -30,9 +30,9 @@ jobs:
         #password: sdf765SDF
         key: ${{secrets.canvas_private_key}}
         port: 22
-        passphrase: ${{secrets.passphrase_private_key}}
-        description: passphrase is used for encrypt the data between two points.
-        args: "-tt"
+        #passphrase: ${{secrets.passphrase_private_key}}
+        #description: passphrase is used for encrypt the data between two points.
+        #args: "-tt"
         debug: true
         script: |
           cd CanvasApp
