@@ -27,12 +27,14 @@ jobs:
       with:
         host: 10.3.17.67
         username: canvas
-        password: sdf765SDF
+        #password: sdf765SDF
         key: ${{secrets.canvas_private_key}}
         port: 22
         passphrase: ${{secrets.passphrase_private_key}}
-        description: passphrase is used for encrypt the data between two points. 
-        script:
+        description: passphrase is used for encrypt the data between two points.
+        args: "-tt"
+        debug: true
+        script: |
           cd CanvasApp
           git pull origin master
           git status
