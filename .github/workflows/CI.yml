@@ -22,3 +22,18 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Deploy and testing ssh connection
+      uses: appleboy/ssh-action@master
+      with:
+        host: 10.3.17.67
+        username: canvas
+        key: ${{secrets.CANVAS_PUBLIC_KEY}}
+        port: 22
+        script:
+          cd CanvasApp
+          git pull origin master
+          git status
+          
+    
+      
+
