@@ -22,3 +22,43 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      
+    - name: Connect VPN
+      uses: actions/checkout@v1
+    - name: Install Open VPN
+      run: sudo apt-get install openvpn
+    - name: Connect EhB VPN
+      uses: golfzaptw/action-connect-ovpn@master
+      id: EhB_VPN
+      with:
+          PING_URL: dtsslvpn.ehb.be
+          #FILE_OVPN: '.github/vpn/config.ovpn'
+          #SECRET: ${{ secrets.SECRET_USERNAME_PASSWORD }}
+          TLS_KEY: ly600aq7jdtrG4U2s5eY
+      #env:
+          #CA_CRT: ${{ secrets.CA_CRT}}
+          #USER_CRT: ${{ secrets.USER_CRT }}
+          #USER_KEY: ${{ secrets.USER_KEY }}
+    #- name: Check Connect VPN
+      #run: echo ${{ steps.connect_vpn.outputs.STATUS }}
+        
+    - name: Deploy and test ssh connection
+      uses: appleboy/ssh-action@master
+      with:
+        host: 10.3.17.67
+        username: canvas
+        #password: sdf765SDF
+        key: ${{secrets.canvas_private_key}}
+        port: 22
+        #passphrase: ${{secrets.passphrase_private_key}}
+        #description: passphrase is used for encrypt the data between two points.
+        #args: "-tt"
+        debug: true
+        script: |
+          cd CanvasApp
+          git pull origin master
+          git status
+          
+    
+      
+

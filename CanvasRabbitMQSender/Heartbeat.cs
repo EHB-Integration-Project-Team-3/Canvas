@@ -5,7 +5,8 @@ using System.Xml.Serialization;
 
 namespace CanvasRabbitMQSender
 {
-    class Heartbeat
+    [XmlRoot(ElementName = "heartbeat")]
+    public class Heartbeat
     {
         public Heartbeat()
         {
@@ -33,4 +34,8 @@ namespace CanvasRabbitMQSender
         [XmlElement("source")]
         public string Source { get; set; }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin

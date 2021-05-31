@@ -8,7 +8,7 @@ namespace CanvasRabbitMQSender
     [XmlRoot(ElementName = "event")]
     public class Event
     {
-        public Event(int id, string title, string description, string locationName, string locationAddress, DateTime startAt, DateTime endAt, int contextId, string contextType, DateTime createdAt, DateTime updatedAt) 
+        public Event(int id, string title, string description, string locationName, string locationAddress, DateTime startAt, DateTime endAt, int contextId, string contextType, DateTime createdAt, DateTime updatedAt, int user_id, int entityversion)
         {
             Id = id;
             Title = title;
@@ -21,13 +21,13 @@ namespace CanvasRabbitMQSender
             ContextType = contextType;
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
-            EntityVersion = 15;
+            EntityVersion = entityversion + 1;
             Header = new HeaderEvent();
             Header.Source = "CANVAS";
+            User_id = user_id;
         }
         public Event()
         {
-            EntityVersion = 15;
             Header = new HeaderEvent();
             Header.Source = "CANVAS";
         }
@@ -62,15 +62,15 @@ namespace CanvasRabbitMQSender
         public DateTime CreatedAt { get; set; }
         [XmlIgnore]
         public DateTime UpdatedAt { get; set; }
-
-
+        [XmlIgnore]
+        public int User_id { get; set; }
     }
 
 
     [Serializable]
     public class HeaderEvent
     {
-        
+
         [XmlElement("method")]
         public string Method { get; set; }
 
