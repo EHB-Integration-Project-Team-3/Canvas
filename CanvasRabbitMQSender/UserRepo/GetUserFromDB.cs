@@ -31,6 +31,7 @@ namespace CanvasRabbitMQSender.UserRepo
 
         public static void GetAndPushUser(Object source, ElapsedEventArgs e)
         {
+            
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionString: constring))
             {
                 connection.Open();
@@ -92,15 +93,15 @@ namespace CanvasRabbitMQSender.UserRepo
 
                 //XSD Validatation
                 XmlSchemaSet xmlSchema = new XmlSchemaSet();
+                xmlSchema.Add("", @"C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator_SendUser.xsd");
 
-                
-                xmlSchema.Add("user.xsd", @"c:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator.xsd");
                 bool validationErrors = false;
+
                 XDocument doc = XDocument.Parse(xml);
 
                 doc.Validate(xmlSchema, (sender, args) =>
                 {
-                    Console.WriteLine("Error Message: " + args.Message);
+                    Console.WriteLine("Error Message: " + args.Message); 
                     validationErrors = true;
                 });
 
@@ -108,8 +109,9 @@ namespace CanvasRabbitMQSender.UserRepo
                 {
                     Console.WriteLine("XSD VALIDATION FAILED");
                 }
-                else
+                else 
                 {
+                    Console.WriteLine("XSD VALIDATION SUCCESS");
                     var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
                     factory.UserName = "guest";
                     factory.Password = "guest";
@@ -126,15 +128,12 @@ namespace CanvasRabbitMQSender.UserRepo
                         Console.WriteLine(" [x] Sent {0}", xml);
                     }
                 }
-
-                
-                
                 users.Clear();
                 Console.WriteLine("Complete");
 
                 Console.ReadLine();
             }
         }
-       
+
     }
 }
