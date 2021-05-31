@@ -34,8 +34,4 @@ namespace CanvasRabbitMQSender
         [XmlElement("source")]
         public string Source { get; set; }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin
