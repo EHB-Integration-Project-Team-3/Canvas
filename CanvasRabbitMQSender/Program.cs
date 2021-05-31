@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Schema;
+using System.Xml.Linq;
 using Npgsql;
 using System.IO;
 using System.Data.SqlClient;

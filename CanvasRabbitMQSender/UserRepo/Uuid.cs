@@ -9,12 +9,14 @@ namespace CanvasRabbitMQSender.UserRepo
     class Uuid
     {
         private static string constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
+
         public static string GetUUID()
         {
             string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid;";
             string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid;";
             string sql = "SELECT UUID()";
             string uuid = "";
+
             try
             {
                 using (MySqlConnection connection = new MySqlConnection(constring1))
@@ -102,7 +104,6 @@ namespace CanvasRabbitMQSender.UserRepo
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             using (NpgsqlCommand command = connection.CreateCommand())
             {
-
                 command.Parameters.AddWithValue("@uuid", uuid);
 
                 command.Parameters.AddWithValue("@id", id);

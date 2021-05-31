@@ -2,8 +2,13 @@
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Timers;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace CanvasRabbitMQSender.UserRepo
 {
@@ -26,11 +31,12 @@ namespace CanvasRabbitMQSender.UserRepo
 
         public static void GetAndPushUser(Object source, ElapsedEventArgs e)
         {
+            
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionString: constring))
             {
                 connection.Open();
                 string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
-                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at, muuid FROM public.users where updated_at > now() - interval '5 second'";
+                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at, deleted_at, muuid FROM public.users where updated_at > now() - interval '5 second'";
                 Console.WriteLine(nowMinus5);
 
                 User user;
@@ -45,21 +51,31 @@ namespace CanvasRabbitMQSender.UserRepo
                                 dr.GetString(1) + "@ipwt3.onmicrosoft.com",
                                 "lecturer",
                                 dr.GetDateTime(4).AddHours(2),
-                                Convert.ToDateTime(dr["updated_at"]).AddHours(2),
-                                false);
+                                Convert.ToDateTime(dr["updated_at"]).AddHours(2),false);
 
 
-                      
-                    //Update
-                      if (!dr.IsDBNull(dr.GetOrdinal("muuid")))
-                      {
-                        user.UUID = dr.GetString(dr.GetOrdinal("muuid"));
-                      }
-                      else
-                      {
-                         user.UUID = Uuid.MakeUserUUID(dr.GetInt32(0));
-                      } 
 
+
+                    if (!dr.IsDBNull(dr.GetOrdinal("deleted_at")))
+                    {
+                        user.Deleted = true;
+                        user.Header.Method = "DELETE";
+                        Console.WriteLine("Deleted statemenet");
+                    }
+                    else
+                    {
+                        //Update
+                        if (!dr.IsDBNull(dr.GetOrdinal("muuid")))
+                        {
+                            user.UUID = dr.GetString(dr.GetOrdinal("muuid"));
+                        }
+                        else
+                        {
+                            user.UUID = Uuid.MakeUserUUID(dr.GetInt32(0));
+                        }
+                    }
+                   
+                   
                     //user.UUID = Uuid.GetUUID();
                     users.Add(user);
                     Console.WriteLine(user.UUID);
@@ -74,26 +90,50 @@ namespace CanvasRabbitMQSender.UserRepo
             {
                 string xml = UserConvertToXml.convertToXml(user);
                 //string xml = Xmlcontroller.SerializeToXmlString(user);
-                var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
-                factory.UserName = "guest";
-                factory.Password = "guest";
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel())
+
+                //XSD Validatation
+                XmlSchemaSet xmlSchema = new XmlSchemaSet();
+                xmlSchema.Add("", @"C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\UserRepo\XSD_Validator_SendUser.xsd");
+
+                bool validationErrors = false;
+
+                XDocument doc = XDocument.Parse(xml);
+
+                doc.Validate(xmlSchema, (sender, args) =>
                 {
-                    var body = Encoding.UTF8.GetBytes(xml);
+                    Console.WriteLine("Error Message: " + args.Message); 
+                    validationErrors = true;
+                });
 
-
-                    channel.BasicPublish(exchange: "user-exchange",
-                                         routingKey: "to-canvas_user-queue",
-                                         basicProperties: null,
-                                         body: body);
-                    Console.WriteLine(" [x] Sent {0}", xml);
+                if (validationErrors)
+                {
+                    Console.WriteLine("XSD VALIDATION FAILED");
                 }
-            }
-            users.Clear();
-            Console.WriteLine("Complete");
+                else 
+                {
+                    Console.WriteLine("XSD VALIDATION SUCCESS");
+                    var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
+                    factory.UserName = "guest";
+                    factory.Password = "guest";
+                    using (var connection = factory.CreateConnection())
+                    using (var channel = connection.CreateModel())
+                    {
+                        var body = Encoding.UTF8.GetBytes(xml);
 
-            Console.ReadLine();
+
+                        channel.BasicPublish(exchange: "user-exchange",
+                                             routingKey: "to-canvas_user-queue",
+                                             basicProperties: null,
+                                             body: body);
+                        Console.WriteLine(" [x] Sent {0}", xml);
+                    }
+                }
+                users.Clear();
+                Console.WriteLine("Complete");
+
+                Console.ReadLine();
+            }
         }
+
     }
 }
