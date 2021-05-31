@@ -14,7 +14,7 @@ namespace CanvasRabbitMQSender.UserRepo
         {
             using (StringWriter stringWriter = new StringWriter())
             {
-                bool validationXsd = false;
+                
                 XmlWriterSettings writersettings = new XmlWriterSettings();
                 writersettings.Indent = true;
                 writersettings.Encoding = Encoding.UTF8;
