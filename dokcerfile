@@ -1,0 +1,4 @@
+FROM ubuntu:20.04
+LABEL maintainer="canvas@ehb.student.be"
+COPY . /app
+RUN make /app
