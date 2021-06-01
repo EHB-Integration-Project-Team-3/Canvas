@@ -19,6 +19,9 @@ namespace CanvasRabbitMQSender.UserRepo
         {
             Id = id;
             Sortable_name = sortable_name;
+            var naam = sortable_name.Split(' ', ',');
+            Lastname = naam[naam.Length - 1];
+            Firstname = naam[0];
             Email = email;
             Role = role;
             CreatedAt = createdAt;

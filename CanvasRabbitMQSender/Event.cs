@@ -22,14 +22,18 @@ namespace CanvasRabbitMQSender
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
             EntityVersion = entityversion + 1;
-            Header = new HeaderEvent();
-            Header.Source = "CANVAS";
+            Header = new HeaderEvent
+            {
+                Source = "CANVAS"
+            };
             User_id = user_id;
         }
         public Event()
         {
-            Header = new HeaderEvent();
-            Header.Source = "CANVAS";
+            Header = new HeaderEvent
+            {
+                Source = "CANVAS"
+            };
         }
 
         [XmlElement("header")]

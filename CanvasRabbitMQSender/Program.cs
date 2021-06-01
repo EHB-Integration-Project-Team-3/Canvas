@@ -5,7 +5,6 @@ using System.Xml.Schema;
 using System.Xml.Linq;
 using Npgsql;
 using System.IO;
-using System.Data.SqlClient;
 using System.Text;
 using System.Timers;
 using System.Xml;
@@ -13,8 +12,6 @@ using RabbitMQ.Client;
 using MySql.Data.MySqlClient;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Xml.Schema;
-using System.Xml.Linq;
 using CanvasRabbitMQSender.UserRepo;
 
 namespace CanvasRabbitMQSender
@@ -501,6 +498,7 @@ namespace CanvasRabbitMQSender
 
             doc.Validate(xmlSchema, (sender, args) =>
             {
+                var test = xml;
                 Console.WriteLine("Error Message: " + args.Message);
                 validationErrors = true;
             });
