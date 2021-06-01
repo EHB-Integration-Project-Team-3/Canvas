@@ -36,6 +36,7 @@ jobs:
       uses: docker/build-push-action@v2.5.0
       with:
         #context: ./
+        file: ./dockerfile
         push: true
         #repository: sonergezgen/myreposoner
         tags: latest
