@@ -16,7 +16,7 @@ using CanvasRabbitMQSender.UserRepo;
 
 namespace CanvasRabbitMQSender
 {
-    class Program
+    public class Program
     {
         public static List<User> users = new List<User>();
         private static string constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
@@ -313,20 +313,42 @@ namespace CanvasRabbitMQSender
         }
         public static string MakeUserUUID(int id)//users
         {
-            string uuid;
-            uuid = GetUUID("user", id);
-            string sql = "UPDATE public.users SET muuid = @uuid where id = @id";
+            string uuid = null;
+            string sql = "select muuid from public.users where id = @id";
+            
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
-            using (NpgsqlCommand command = connection.CreateCommand())
             {
-                command.Parameters.AddWithValue("@uuid", uuid);
-                command.Parameters.AddWithValue("@id", id);
-                command.CommandText = sql;
                 connection.Open();
-                command.ExecuteNonQuery();
+                using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
+                {
+                    using (NpgsqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (!reader.IsDBNull(0))
+                            {
+                                uuid = reader.GetString(0);
+                            }
+                        }
+                    }
+                }
+                if (String.IsNullOrEmpty(uuid))
+                {
+                    uuid = GetUUID("user", id);
+                    sql = "UPDATE public.users SET muuid = @uuid where id = @id";
+                    using (NpgsqlCommand command = connection.CreateCommand())
+                    {
+                        command.Parameters.AddWithValue("@uuid", uuid);
+                        command.Parameters.AddWithValue("@id", id);
+                        command.CommandText = sql;
+                        command.ExecuteNonQuery();
+                    }
+
+                }
                 connection.Close();
+                return uuid;
             }
-            return uuid;
+            
         }
         public static string GetUUID(string type, int id)
         {

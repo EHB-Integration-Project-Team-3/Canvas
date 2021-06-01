@@ -57,7 +57,7 @@ namespace CanvasRabbitMQSender.UserRepo
                       }
                       else
                       {
-                         user.UUID = Uuid.MakeUserUUID(dr.GetInt32(0));
+                         user.UUID = Program.MakeUserUUID(dr.GetInt32(0));
                       } 
 
                     //user.UUID = Uuid.GetUUID();
@@ -72,22 +72,30 @@ namespace CanvasRabbitMQSender.UserRepo
 
             foreach (var user in users)
             {
-                string xml = UserConvertToXml.convertToXml(user);
-                //string xml = Xmlcontroller.SerializeToXmlString(user);
-                var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
-                factory.UserName = "guest";
-                factory.Password = "guest";
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel())
+                string xml = XmlController.SerializeToXmlString<User>(user);
+                if (Program.XSDValidatie(xml, "user.xsd"))
                 {
-                    var body = Encoding.UTF8.GetBytes(xml);
+                    continue;
+                }
+                if (user.CreatedAt == user.UpdatedAt || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
+                {
+                    //string xml = UserConvertToXml.convertToXml(user);
+                    //string xml = Xmlcontroller.SerializeToXmlString(user);
+                    var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
+                    factory.UserName = "guest";
+                    factory.Password = "guest";
+                    using (var connection = factory.CreateConnection())
+                    using (var channel = connection.CreateModel())
+                    {
+                        var body = Encoding.UTF8.GetBytes(xml);
 
 
-                    channel.BasicPublish(exchange: "user-exchange",
-                                         routingKey: "to-canvas_user-queue",
-                                         basicProperties: null,
-                                         body: body);
-                    Console.WriteLine(" [x] Sent {0}", xml);
+                        channel.BasicPublish(exchange: "user-exchange",
+                                             routingKey: "to-canvas_user-queue",
+                                             basicProperties: null,
+                                             body: body);
+                        Console.WriteLine(" [x] Sent {0}", xml);
+                    }
                 }
             }
             users.Clear();

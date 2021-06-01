@@ -6,10 +6,14 @@ using System.Xml.Serialization;
 namespace CanvasRabbitMQSender.UserRepo
 {
     [XmlRoot(ElementName = "user")]
-    class User
+    public class User
     {
         
-        public User() { }
+        public User()
+        {
+            Header = new HeaderUser();
+            Header.Source = "CANVAS";
+        }
         
         public User(int id, string sortable_name, string email, string role, DateTime createdAt, DateTime updatedAt, bool deleted)
         {
@@ -20,11 +24,19 @@ namespace CanvasRabbitMQSender.UserRepo
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
             Deleted = deleted;
-            EntityVersion = 12;
+            EntityVersion = 1;
             Header = new HeaderUser();
             Header.Source = "CANVAS";
         }
 
+        [XmlElement("header")]
+        public HeaderUser Header { get; set; }
+
+        [XmlElement("uuid")]
+        public string UUID { get; set; }
+
+        [XmlElement("entityVersion")]
+        public int EntityVersion { get; set; }
 
         [XmlIgnore]
         public int Id { get; set; }
@@ -38,14 +50,11 @@ namespace CanvasRabbitMQSender.UserRepo
         [XmlElement("firstName")]
         public string Firstname { get; set; }
 
-        [XmlElement("email")]
+        [XmlElement("emailAddress")]
         public string Email { get; set; }
 
         [XmlElement("role")]
         public string Role { get; set; }
-
-        [XmlElement("uuid")]
-        public string UUID { get; set; }
 
         [XmlIgnore]
         public DateTime CreatedAt { get; set; }
@@ -56,11 +65,6 @@ namespace CanvasRabbitMQSender.UserRepo
         [XmlIgnore]
         public bool Deleted { get; set; }
 
-        [XmlElement("header")]
-        public HeaderUser Header { get; set; }
-
-        [XmlElement("entityVersion")]
-        public int EntityVersion { get; set; }
     }
 }
 

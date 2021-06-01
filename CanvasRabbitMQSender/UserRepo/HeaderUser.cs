@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace CanvasRabbitMQSender.UserRepo
 {
     [Serializable]
-    class HeaderUser
+    public class HeaderUser
     {
         [XmlElement("method")]
         public string Method { get; set; }
