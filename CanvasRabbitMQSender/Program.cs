@@ -12,11 +12,13 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Schema;
 using System.Xml.Linq;
+using CanvasRabbitMQSender.UserRepo;
 
 namespace CanvasRabbitMQSender
 {
     class Program
     {
+        public static List<User> users = new List<User>();
         private static string constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
         private static Timer timerSendEvents;
         private static Timer timerHeartbeat;
@@ -25,8 +27,8 @@ namespace CanvasRabbitMQSender
 
         public static void Main()
         {
-            string test = "1ff45812-bfe9-11eb-b876-00155d110504";
-            CheckUpdateEntityVersion(test, 2);
+            //send User
+            GetUserFromDB.SetUserTimer();
             //send events
             timerSendEvents = new System.Timers.Timer(5000);
             timerSendEvents.Elapsed += TimedEventSendEvent;
@@ -44,6 +46,8 @@ namespace CanvasRabbitMQSender
             timerSendEvents.Dispose();
             timerHeartbeat.Stop();
             timerHeartbeat.Dispose();
+            GetUserFromDB.usertimer.Stop();
+            GetUserFromDB.usertimer.Dispose();
             Console.WriteLine("Terminating the application...");
         }
         
