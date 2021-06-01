@@ -63,12 +63,6 @@ C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitM
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.csproj.CoreCompileInputs.cache
-C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.csprojAssemblyReference.cache
-C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.AssemblyInfoInputs.cache
-C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.AssemblyInfo.cs
-C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.csproj.CoreCompileInputs.cache
-C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.dll
-C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.pdb
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\CanvasRabbitMQSender.exe
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\CanvasRabbitMQSender.deps.json
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\CanvasRabbitMQSender.runtimeconfig.json
@@ -103,7 +97,12 @@ C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQ
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
+C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.AssemblyInfoInputs.cache
+C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.AssemblyInfo.cs
+C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.csproj.CoreCompileInputs.cache
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.csproj.CopyComplete
+C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.dll
+C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.pdb
 C:\Users\soner\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\obj\Debug\netcoreapp3.1\CanvasRabbitMQSender.genruntimeconfig.cache
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\attendance.xsd
 C:\Users\Sander\Source\Repos\EHB-Integration-Project-Team-3\Canvas\CanvasRabbitMQSender\bin\Debug\netcoreapp3.1\event.xsd
