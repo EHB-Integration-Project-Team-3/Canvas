@@ -28,6 +28,7 @@ jobs:
       run: dotnet test
     - 
       name: publish
+      working-directory: CanvasRabitMQSenderTests
       run: dotnet publish src -c Release -o deploy
 
     - name: Create VPN connection & Connect to it
