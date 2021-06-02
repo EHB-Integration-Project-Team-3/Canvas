@@ -321,6 +321,7 @@ namespace CanvasRabbitMQSender
                 connection.Open();
                 using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@id", id);
                     using (NpgsqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())

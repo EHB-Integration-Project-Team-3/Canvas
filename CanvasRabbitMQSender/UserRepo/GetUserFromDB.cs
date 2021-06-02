@@ -68,7 +68,7 @@ namespace CanvasRabbitMQSender.UserRepo
                         }
                         else
                         {
-                            user.Header.Method = "Update";
+                            user.Header.Method = "UPDATE";
                         }
                     }
 
@@ -87,6 +87,7 @@ namespace CanvasRabbitMQSender.UserRepo
             foreach (var user in users)
             {
                 string xml = XmlController.SerializeToXmlString<User>(user);
+
                 if (Program.XSDValidatie(xml, "user.xsd"))
                 {
                     continue;
