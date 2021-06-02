@@ -55,7 +55,7 @@ jobs:
         username: ftpuser
         password: ubuntu123
         port: 21
-        local-dir: ./
+        local-dir: /home/runner/work/Canvas/Canvas/CanvasRabittMQSender/deploy/
         server-dir: /home/ftpuser/ftp/files/
 
    # - name: git-ftp-action
