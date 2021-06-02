@@ -30,12 +30,22 @@ jobs:
     - 
       name: publish
       working-directory: CanvasRabbitMQSender
-      run: dotnet publish
-
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+    - 
+      name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v2
+      with:
+        name: .net-app
+        path: ${{env.DOTNET_ROOT}}/myapp
   deploy:
     runs-on: windows-latest
     needs: build
     steps:
+    - 
+      name: Download artifact from build job
+      uses: actions/download-artifact@v2
+      with:
+        name: .net-app
     -
       name: Create VPN connection
       shell: pwsh
@@ -45,14 +55,7 @@ jobs:
       run: | 
        Add-VpnConnection -Name "EHB_VPN" -ServerAddress "dtsslvpn.ehb.be" -TunnelType "SSTP" -AllUserConnection -Force
        rasdial "EHB_VPN" "$env:USER" "$env:SECRET"
-    - 
-      name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.x
-    - name: publish
-      working-directory: CanvasRabbitMQSender
-      run: dotnet publish
+
        
     - name: FTP Deploy
         #You may pin to the exact commit or the version.
