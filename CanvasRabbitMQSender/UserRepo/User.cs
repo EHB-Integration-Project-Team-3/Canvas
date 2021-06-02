@@ -15,14 +15,14 @@ namespace CanvasRabbitMQSender.UserRepo
             Header.Source = "CANVAS";
         }
         
-        public User(int id, string sortable_name, string email, string role, DateTime createdAt, DateTime updatedAt, bool deleted)
+        public User(int id, string sortable_name, string role, DateTime createdAt, DateTime updatedAt, bool deleted)
         {
             Id = id;
             Sortable_name = sortable_name;
             var naam = sortable_name.Split(' ', ',');
-            Lastname = naam[naam.Length - 1];
-            Firstname = naam[0];
-            Email = email;
+            Firstname = naam[naam.Length - 1];
+            Lastname = naam[0];
+            Email = Firstname + "." + Lastname + "@ipwt3.onmicrosoft.com";
             Role = role;
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;

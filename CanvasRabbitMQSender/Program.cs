@@ -72,7 +72,7 @@ namespace CanvasRabbitMQSender
                                      routingKey: "to-monitoring_heartbeat-queue",
                                      basicProperties: null,
                                      body: body);
-                Console.WriteLine(" [x] Sent {0}", xml);
+                //Console.WriteLine(" [x] Sent {0}", xml);
             }
             newCourseEvents.Clear();
             Console.WriteLine("Complete");

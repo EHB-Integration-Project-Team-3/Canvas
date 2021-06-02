@@ -30,7 +30,7 @@ namespace CanvasRabbitMQSender.UserRepo
             {
                 connection.Open();
                 string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
-                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at, muuid FROM public.users where updated_at > now() - interval '5 second'";
+                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at, muuid, workflow_state FROM public.users where updated_at > now() - interval '5 second' and id != 1";
                 Console.WriteLine(nowMinus5);
 
                 User user;
@@ -42,7 +42,6 @@ namespace CanvasRabbitMQSender.UserRepo
                     user = new User(
                                 dr.GetInt32(0),
                                 dr.GetString(dr.GetOrdinal("sortable_name")),
-                                dr.GetString(1) + "@ipwt3.onmicrosoft.com",
                                 "lecturer",
                                 dr.GetDateTime(4).AddHours(2),
                                 Convert.ToDateTime(dr["updated_at"]).AddHours(2),
@@ -58,8 +57,23 @@ namespace CanvasRabbitMQSender.UserRepo
                       else
                       {
                          user.UUID = Program.MakeUserUUID(dr.GetInt32(0));
-                      } 
+                      }
+                    if (dr.GetString(dr.GetOrdinal("workflow_state")) == "deleted") {
+                        user.Header.Method = "DELETE";
 
+                    } else { 
+                        if (user.CreatedAt == user.UpdatedAt)
+                        {
+                            user.Header.Method = "CREATE";
+                        }
+                        else
+                        {
+                            user.Header.Method = "Update";
+                        }
+                    }
+
+                    
+                    user.Header.Method = "CREATE";
                     //user.UUID = Uuid.GetUUID();
                     users.Add(user);
                     Console.WriteLine(user.UUID);
