@@ -85,19 +85,19 @@ namespace CanvasRabitMQSenderTests
         public void TestEventToXML()
         {
             string xml = XmlController.SerializeToXmlString<Event>(objectEvent);
-            Assert.AreSame(xml, xmlEvent);
+            Assert.AreEqual<String>(xml.Trim(), xmlEvent.Trim());
         }
         [TestMethod]
         public void TestUserToXML()
         {
             string xml = XmlController.SerializeToXmlString<User>(objectUser);
-            Assert.AreSame(xml, xmlUser);
+            Assert.AreEqual<String>(xml.Trim(), xmlUser.Trim());
         }
         [TestMethod]
         public void TestHeartbeatToXML()
         {
             string xml = XmlController.SerializeToXmlString<Heartbeat>(objectHeartbeat);
-            Assert.AreSame(xml, xmlHeartbeat);
+            Assert.AreEqual<String>(xml.Trim(), xmlHeartbeat.Trim());
         }
         [TestMethod]
         public void CheckHeartbeatXSD() {
