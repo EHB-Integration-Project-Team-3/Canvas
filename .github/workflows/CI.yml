@@ -51,7 +51,7 @@ jobs:
         #uses: SamKirkland/FTP-Deploy-Action@2a4e9b1312ebeb73a1f72b9330c71831c1e4ce01
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       with: 
-        server: 10.3.17.65
+        server: 10.3.17.67
         username: canvas
         password: ${{ secrets.VM_PASSWORD }}
         port: 21
