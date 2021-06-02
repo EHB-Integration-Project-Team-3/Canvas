@@ -50,7 +50,7 @@ namespace CanvasRabbitMQSender
             GetUserFromDB.usertimer.Dispose();
             Console.WriteLine("Terminating the application...");
         }
-        
+
         public async static void TimedHeartBeat(Object source, ElapsedEventArgs arg)
         {
             Heartbeat heartbeat = new Heartbeat();
@@ -91,7 +91,7 @@ namespace CanvasRabbitMQSender
                 return "ONLINE";
             }
         }
-        public static void TimedEventSendEvent(Object source, ElapsedEventArgs arg)
+        public async static void TimedEventSendEvent(Object source, ElapsedEventArgs arg)
         {
             //try
             //{
@@ -111,7 +111,6 @@ namespace CanvasRabbitMQSender
                             string description = "";
                             string locationAddress = "";
                             string locationName = "";
-                            int entityversion = 1;
                             bool deleted = false;
 
                             if (!reader.IsDBNull(1))
@@ -228,18 +227,20 @@ namespace CanvasRabbitMQSender
                     factory.UserName = "guest";
                     factory.Password = "guest";
                     using (var connection = factory.CreateConnection())
-                    using (var channel = connection.CreateModel())
                     {
-                        var body = Encoding.UTF8.GetBytes(xml);
-                        channel.BasicPublish(exchange: "event-exchange",
-                                             routingKey: "",
-                                             basicProperties: null,
-                                             body: body);
-                        Console.WriteLine(" [x] Sent {0}", xml);
+                        using (var channel = connection.CreateModel())
+                        {
+                            var body = Encoding.UTF8.GetBytes(xml);
+                            channel.BasicPublish(exchange: "event-exchange",
+                                                 routingKey: "",
+                                                 basicProperties: null,
+                                                 body: body);
+                            Console.WriteLine(" [x] Sent {0}", xml);
+                        }
                     }
                 }
             }
-            
+
             newCourseEvents.Clear();
         }
 
@@ -302,8 +303,8 @@ namespace CanvasRabbitMQSender
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             using (NpgsqlCommand command = connection.CreateCommand())
             {
-                command.Parameters.AddWithValue("@uuid", uuid);
-                command.Parameters.AddWithValue("@id", id);
+                command.Parameters.AddWithValue("uuid", uuid);
+                command.Parameters.AddWithValue("id", id);
                 command.CommandText = sql;
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -315,13 +316,13 @@ namespace CanvasRabbitMQSender
         {
             string uuid = null;
             string sql = "select muuid from public.users where id = @id";
-            
+
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             {
                 connection.Open();
                 using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@id", id);
+                    command.Parameters.AddWithValue("id", id);
                     using (NpgsqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -333,23 +334,27 @@ namespace CanvasRabbitMQSender
                         }
                     }
                 }
-                if (String.IsNullOrEmpty(uuid))
+                connection.Close();
+            }
+            if (String.IsNullOrEmpty(uuid))
+            {
+                using (NpgsqlConnection connection = new NpgsqlConnection(constring))
                 {
+                    connection.Open();
                     uuid = GetUUID("user", id);
                     sql = "UPDATE public.users SET muuid = @uuid where id = @id";
                     using (NpgsqlCommand command = connection.CreateCommand())
                     {
-                        command.Parameters.AddWithValue("@uuid", uuid);
-                        command.Parameters.AddWithValue("@id", id);
+                        command.Parameters.AddWithValue("uuid", uuid);
+                        command.Parameters.AddWithValue("id", id);
                         command.CommandText = sql;
                         command.ExecuteNonQuery();
                     }
-
+                    connection.Close();
                 }
-                connection.Close();
-                return uuid;
             }
-            
+            return uuid;
+
         }
         public static string GetUUID(string type, int id)
         {
@@ -374,11 +379,16 @@ namespace CanvasRabbitMQSender
                             }
                         }
                     }
+                    connection.Close();
+                }
+                using (MySqlConnection connection = new MySqlConnection(constring1))
+                {
+                    connection.Open();
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        command.Parameters.AddWithValue("@uuid", uuid);
-                        command.Parameters.AddWithValue("@type", type);
-                        command.Parameters.AddWithValue("@id", id);
+                        command.Parameters.AddWithValue("uuid", uuid);
+                        command.Parameters.AddWithValue("type", type);
+                        command.Parameters.AddWithValue("id", id);
                         command.CommandText = sql2;
                         command.ExecuteNonQuery();
                     }
@@ -404,12 +414,19 @@ namespace CanvasRabbitMQSender
                                 }
                             }
                         }
-                            using (MySqlCommand command = connection.CreateCommand())
-                            {
-                                command.Parameters.AddWithValue("@uuid", uuid);
-                                command.CommandText = sql2;
-                                command.ExecuteNonQuery();
-                            }
+                        connection.Close();
+                    }
+                    using (MySqlConnection connection = new MySqlConnection(constring1))
+                    {
+                        connection.Open();
+                        using (MySqlCommand command = connection.CreateCommand())
+                        {
+                            command.Parameters.AddWithValue("uuid", uuid);
+                            command.Parameters.AddWithValue("type", type);
+                            command.Parameters.AddWithValue("id", id);
+                            command.CommandText = sql2;
+                            command.ExecuteNonQuery();
+                        }
                         connection.Close();
                     }
                 }
@@ -444,11 +461,11 @@ namespace CanvasRabbitMQSender
                     connection.Open();
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        command.Parameters.AddWithValue("@entityversion", entityversion);
-                        command.Parameters.AddWithValue("@uuid", uuid);
-                        command.Parameters.AddWithValue("@MyService", "Canvas");
-                        command.Parameters.AddWithValue("@ServiceX", "Frontend");
-                        command.Parameters.AddWithValue("@Servicey", "Planning");
+                        command.Parameters.AddWithValue("entityversion", entityversion);
+                        command.Parameters.AddWithValue("uuid", uuid);
+                        command.Parameters.AddWithValue("MyService", "Canvas");
+                        command.Parameters.AddWithValue("ServiceX", "Frontend");
+                        command.Parameters.AddWithValue("Servicey", "Planning");
                         command.CommandText = sql;
                         int editeds = command.ExecuteNonQuery();
                         edited = command.ExecuteNonQuery() == 1;
@@ -467,11 +484,11 @@ namespace CanvasRabbitMQSender
                         connection.Open();
                         using (MySqlCommand command = connection.CreateCommand())
                         {
-                            command.Parameters.AddWithValue("@entityversion", entityversion);
-                            command.Parameters.AddWithValue("@uuid", uuid);
-                            command.Parameters.AddWithValue("@MyService", "Canvas");
-                            command.Parameters.AddWithValue("@ServiceX", "Frontend");
-                            command.Parameters.AddWithValue("@Servicey", "Planning");
+                            command.Parameters.AddWithValue("entityversion", entityversion);
+                            command.Parameters.AddWithValue("uuid", uuid);
+                            command.Parameters.AddWithValue("MyService", "Canvas");
+                            command.Parameters.AddWithValue("ServiceX", "Frontend");
+                            command.Parameters.AddWithValue("Servicey", "Planning");
                             command.CommandText = sql;
                             edited = command.ExecuteNonQuery() == 1;
                         }

@@ -26,6 +26,7 @@ namespace CanvasRabbitMQSender.UserRepo
 
         public static void GetAndPushUser(Object source, ElapsedEventArgs e)
         {
+            DateTime now1 = DateTime.Now;
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionString: constring))
             {
                 connection.Open();
@@ -99,23 +100,22 @@ namespace CanvasRabbitMQSender.UserRepo
                     var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
                     factory.UserName = "guest";
                     factory.Password = "guest";
-                    using (var connection = factory.CreateConnection())
-                    using (var channel = connection.CreateModel())
-                    {
-                        var body = Encoding.UTF8.GetBytes(xml);
+                    using (var connection = factory.CreateConnection()) {
+                        using (var channel = connection.CreateModel())
+                        {
+                            var body = Encoding.UTF8.GetBytes(xml);
 
 
-                        channel.BasicPublish(exchange: "user-exchange",
-                                             routingKey: "to-canvas_user-queue",
-                                             basicProperties: null,
-                                             body: body);
-                        Console.WriteLine(" [x] Sent {0}", xml);
+                            channel.BasicPublish(exchange: "user-exchange",
+                                                 routingKey: "to-canvas_user-queue",
+                                                 basicProperties: null,
+                                                 body: body);
+                            Console.WriteLine(" [x] Sent {0}", xml);
+                        }
                     }
                 }
             }
             users.Clear();
-            Console.WriteLine("Complete");
-
             Console.ReadLine();
         }
     }
