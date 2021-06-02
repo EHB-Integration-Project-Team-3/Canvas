@@ -55,7 +55,7 @@ jobs:
         username: ftpuser
         password: ubuntu123
         port: 21
-        local-dir: .
+        local-dir: ./
         server-dir: /home/ftpuser/ftp/files/
 
    # - name: git-ftp-action
