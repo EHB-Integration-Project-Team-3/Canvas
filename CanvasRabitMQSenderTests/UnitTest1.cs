@@ -123,20 +123,24 @@ namespace CanvasRabitMQSenderTests
             Assert.AreEqual(heartbeat.ToString(), objectHeartbeat.ToString());
         }
         [TestMethod]
+        [DeploymentItem("Heartbeat.xsd")]
         public void CheckHeartbeatXSD() {
             Assert.IsTrue(!Program.XSDValidatie(xmlHeartbeat, "Heartbeat.xsd"));
         }
         [TestMethod]
+        [DeploymentItem("User.xsd")]
         public void CheckUserXSD()
         {
             Assert.IsTrue(!Program.XSDValidatie(xmlUser, "User.xsd"));
         }
         [TestMethod]
+        [DeploymentItem("Event.xsd")]
         public void CheckEventXSD()
         {
             Assert.IsTrue(!Program.XSDValidatie(xmlEvent, "Event.xsd"));
         }
         [TestMethod]
+        [DeploymentItem("Heartbeat.xsd")]
         public void CheckHeartbeatXSDvanObject()
         {
             Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<Heartbeat>(objectHeartbeat), "Heartbeat.xsd"));
@@ -147,6 +151,7 @@ namespace CanvasRabitMQSenderTests
             Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<User>(objectUser), "User.xsd"));
         }
         [TestMethod]
+        [DeploymentItem("Event.xsd")]
         public void CheckEventXSDvanObject()
         {
             Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<Event>(objectEvent), "Event.xsd"));
