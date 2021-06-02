@@ -45,7 +45,11 @@ jobs:
       run: | 
        Add-VpnConnection -Name "EHB_VPN" -ServerAddress "dtsslvpn.ehb.be" -TunnelType "SSTP" -AllUserConnection -Force
        rasdial "EHB_VPN" "$env:USER" "$env:SECRET"
-       
+    - 
+      name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
     - name: publish
       working-directory: CanvasRabbitMQSender
       run: dotnet publish
