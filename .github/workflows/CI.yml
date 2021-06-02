@@ -45,11 +45,11 @@ jobs:
         local: /home/runner/work/Canvas/Canvas/CanvasRabitMQSenderTests/deploy/
         host: 10.3.17.67
         username: canvas
-        passphrase: ${{ VM_PASSWORD }}
+        passphrase: ${{ secrets.VM_PASSWORD }}
     - name: Run SSH command
       uses: garygrossgarten/github-action-ssh@v0.3.0
       with:
         command: sudo service CanvasRabitMQSenderTests start
         host: 10.3.17.67
         username: canvas
-        passphrase: ${{ VM_PASSWORD }}
+        passphrase: ${{ secrets.VM_PASSWORD }}
