@@ -12,73 +12,44 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET
+    - 
+      name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.x
-    - name: Install dependencies
+    - 
+      name: Install dependencies
       run: dotnet restore
-    - name: Build
+    - 
+      name: Build
       run: dotnet build --no-restore
-    - name: Test
+    - 
+      name: Test
       run: dotnet test
-    - name: Docker Login
-      uses: docker/login-action@v1.9.0
-      with:
-        username: ${{secrets.DOCKER_USERNAME}}
-        password: ${{secrets.DOCKER_PASSWORD}}
-    - name: Docker Setup Buildx
-  # You may pin to the exact commit or the version.
-  # uses: docker/setup-buildx-action@0d135e0c2fc0dba0729c1a47ecfcf5a3c7f8579e
-      uses: docker/setup-buildx-action@v1.3.0
-        
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v2.5.0
-      with:
-        #context: ./
-        file: ./dockerfile
-        push: true
-        #repository: sonergezgen/myreposoner
-        tags: latest
-        
-        
-      
-    #- name: Connect VPN
-      #uses: actions/checkout@v1
-   # - name: Install Open VPN
-   #   run: sudo apt-get install openvpn
-   #- name: Connect EhB VPN
-    #  uses: golfzaptw/action-connect-ovpn@master
-    #  id: EhB_VPN
-    #  with:
-     #     PING_URL: dtsslvpn.ehb.be
-    #      #FILE_OVPN: '.github/vpn/config.ovpn'
-          #SECRET: ${{ secrets.SECRET_USERNAME_PASSWORD }}
-      #    TLS_KEY: ly600aq7jdtrG4U2s5eY
-      #env:
-          #CA_CRT: ${{ secrets.CA_CRT}}
-          #USER_CRT: ${{ secrets.USER_CRT }}
-          #USER_KEY: ${{ secrets.USER_KEY }}
-    #- name: Check Connect VPN
-      #run: echo ${{ steps.connect_vpn.outputs.STATUS }}
-        
-   # - name: Deploy and test ssh connection
-   #   uses: appleboy/ssh-action@master
-   #   with:
-    #    host: 10.3.17.67
-    #    username: canvas
-   #     #password: sdf765SDF
-   #     key: ${{secrets.canvas_private_key}}
-   #     port: 22
-        #passphrase: ${{secrets.passphrase_private_key}}
-        #description: passphrase is used for encrypt the data between two points.
-        #args: "-tt"
-     #   debug: true
-     #   script: |
-     #     cd CanvasApp
-     #    git pull origin master
-      #    git status
-          
-    
-      
+    - 
+      name: publish
+      run: dotnet publish src -c Release -o deploy
 
+    - name: Create VPN connection & Connect to it
+      shell: pwsh
+      env:
+        USER: ${{ secrets.EHB_USER}}
+        SECRET: ${{ secrets.EHB_PASSWORD}}
+      run: | 
+       Add-VpnConnection -Name "EHB_VPN" -ServerAddress "dtsslvpn.ehb.be" -TunnelType "SSTP" -AllUserConnection -Force
+       rasdial "EHB_VPN" "$env:USER" "$env:SECRET"
+       
+    - name: Copy via ssh
+      uses: garygrossgarten/github-action-scp@v0.5.3
+      with:
+        local: /home/runner/work/Canvas/Canvas/CanvasRabitMQSenderTests/deploy/
+        host: 10.3.17.67
+        username: canvas
+        passphrase: ${{ VM_PASSWORD }}
+    - name: Run SSH command
+      uses: garygrossgarten/github-action-ssh@v0.3.0
+      with:
+        command: sudo service CanvasRabitMQSenderTests start
+        host: 10.3.17.67
+        username: canvas
+        passphrase: ${{ VM_PASSWORD }}
