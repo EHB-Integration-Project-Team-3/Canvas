@@ -125,19 +125,19 @@ namespace CanvasRabitMQSenderTests
         [TestMethod]
         [DeploymentItem("Heartbeat.xsd")]
         public void CheckHeartbeatXSD() {
-            Assert.IsTrue(!Program.XSDValidatie(xmlHeartbeat, "Heartbeat.xsd"));
+            Assert.IsTrue(!Program.XSDValidatie(xmlHeartbeat, "heartbeat.xsd"));
         }
         [TestMethod]
         [DeploymentItem("User.xsd")]
         public void CheckUserXSD()
         {
-            Assert.IsTrue(!Program.XSDValidatie(xmlUser, "User.xsd"));
+            Assert.IsTrue(!Program.XSDValidatie(xmlUser, "user.xsd"));
         }
         [TestMethod]
         [DeploymentItem("Event.xsd")]
         public void CheckEventXSD()
         {
-            Assert.IsTrue(!Program.XSDValidatie(xmlEvent, "Event.xsd"));
+            Assert.IsTrue(!Program.XSDValidatie(xmlEvent, "event.xsd"));
         }
         [TestMethod]
         [DeploymentItem("Heartbeat.xsd")]
