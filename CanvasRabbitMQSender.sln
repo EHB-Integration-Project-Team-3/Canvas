@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CanvasRabbitMQSender", "CanvasRabbitMQSender\CanvasRabbitMQSender.csproj", "{A9936884-5827-45D4-B6DB-460F56B8CC6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CanvasRabitMQSenderTests", "CanvasRabitMQSenderTests\CanvasRabitMQSenderTests.csproj", "{84EDAF89-F6C7-44E5-854E-F6214E707818}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CanvasRabitMQSenderTests", "CanvasRabitMQSenderTests\CanvasRabitMQSenderTests.csproj", "{84EDAF89-F6C7-44E5-854E-F6214E707818}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A5937957-FDB2-492F-B6FA-0FC975BA5E78}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

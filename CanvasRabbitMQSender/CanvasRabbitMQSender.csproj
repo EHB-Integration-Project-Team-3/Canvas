@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MySql.Data" Version="8.0.24" />
     <PackageReference Include="Npgsql" Version="5.0.4" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />

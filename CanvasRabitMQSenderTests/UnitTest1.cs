@@ -43,7 +43,12 @@ namespace CanvasRabitMQSenderTests
             Email = "sanderhoremans@ipwt3.onmicrosoft.com", 
             UUID = "30dd879c-ee2f-11db-8314-0800200c9a61"
         }; 
-        private Heartbeat objectHeartbeat = new Heartbeat() {TimeStamp = new System.DateTime(2021,05,28,20,45,00), Header = new HeaderHeartbeat() { Status = "ONLINE", Source = "CANVAS"} 
+        private Heartbeat objectHeartbeat = new Heartbeat() {
+            TimeStamp = new System.DateTime(2021,05,28,20,45,00), 
+            Header = new HeaderHeartbeat() { 
+                Status = "ONLINE", 
+                Source = "CANVAS"
+            } 
         };
         private string xmlHeartbeat = "<?xml version=\"1.0\"?>\r\n" +
             "<heartbeat xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  " +
@@ -85,19 +90,37 @@ namespace CanvasRabitMQSenderTests
         public void TestEventToXML()
         {
             string xml = XmlController.SerializeToXmlString<Event>(objectEvent);
-            Assert.AreEqual<String>(xml.Trim(), xmlEvent.Trim());
+            Assert.AreEqual(xml.Trim(), xmlEvent.Trim());
         }
         [TestMethod]
         public void TestUserToXML()
         {
             string xml = XmlController.SerializeToXmlString<User>(objectUser);
-            Assert.AreEqual<String>(xml.Trim(), xmlUser.Trim());
+            Assert.AreEqual(xml.Trim(), xmlUser.Trim());
         }
         [TestMethod]
         public void TestHeartbeatToXML()
         {
             string xml = XmlController.SerializeToXmlString<Heartbeat>(objectHeartbeat);
-            Assert.AreEqual<String>(xml.Trim(), xmlHeartbeat.Trim());
+            Assert.AreEqual(xml.Trim(), xmlHeartbeat.Trim());
+        }
+        [TestMethod]
+        public void TestEventFromXML()
+        {
+            Event desEvent = XmlController.DeserializeXmlString<Event>(xmlEvent);
+            Assert.AreEqual(desEvent.ToString(), objectEvent.ToString());
+        }
+        [TestMethod]
+        public void TestUserFromXML()
+        {
+            User user = XmlController.DeserializeXmlString<User>(xmlUser);
+            Assert.AreEqual(user.ToString(), objectUser.ToString());
+        }
+        [TestMethod]
+        public void TestHeartbeatFromXML()
+        {
+            Object heartbeat = XmlController.DeserializeXmlString<Heartbeat>(xmlHeartbeat);
+            Assert.AreEqual(heartbeat.ToString(), objectHeartbeat.ToString());
         }
         [TestMethod]
         public void CheckHeartbeatXSD() {
@@ -128,6 +151,5 @@ namespace CanvasRabitMQSenderTests
         {
             Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<Event>(objectEvent), "Event.xsd"));
         }
-
     }
 }
