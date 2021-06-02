@@ -45,18 +45,18 @@ jobs:
       run: | 
        Add-VpnConnection -Name "EHB_VPN" -ServerAddress "dtsslvpn.ehb.be" -TunnelType "SSTP" -AllUserConnection -Force
        rasdial "EHB_VPN" "$env:USER" "$env:SECRET"
-    -
-      name: start VPN connection
-      shell: pwsh
+    - name: ls -a via OPEN SSH Private Key
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: ls -a
+        host: 10.3.17.67
+        username: canvas
+        passphrase: ${{ secrets.VM_PASSWORD }}
       env:
-        USER: ${{ secrets.EHB_USER}}
-        SECRET: ${{ secrets.EHB_PASSWORD}}
-      run: | 
-        ping 10.3.17.67
-       
-
-    - name: Run SSH command
-      uses: garygrossgarten/github-action-ssh@v0.3.0
+        CI: true
+    - 
+      name: Run SSH command
+      uses: garygrossgarten/github-action-ssh@release
       with:
         command: sudo service CanvasRabitMQSender start
         host: 10.3.17.67
