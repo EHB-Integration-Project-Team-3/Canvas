@@ -26,15 +26,16 @@ jobs:
     - 
       name: Test
       run: dotnet test
+      
+    - 
+      name: publish
+      working-directory: CanvasRabbitMQSender
+      run: dotnet publish
 
   deploy:
     runs-on: windows-latest
     needs: build
     steps:
-    - 
-      name: publish
-      working-directory: CanvasRabbitMQSender
-      run: dotnet publish
     -
       name: Create VPN connection & Connect to it
       shell: pwsh
