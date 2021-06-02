@@ -490,7 +490,14 @@ namespace CanvasRabbitMQSender
         public static bool XSDValidatie(string xml, string xsd)
         {
             XmlSchemaSet xmlSchema = new XmlSchemaSet();
-            xmlSchema.Add("", Environment.CurrentDirectory + "/" + xsd);
+            try
+            {
+                xmlSchema.Add("", Environment.CurrentDirectory + "/" + xsd);
+            }
+            catch (Exception)
+            {
+                xmlSchema.Add("", Environment.CurrentDirectory + "/../../../" + xsd);
+            }
 
             bool validationErrors = false;
 
