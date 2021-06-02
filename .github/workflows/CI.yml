@@ -37,7 +37,7 @@ jobs:
     needs: build
     steps:
     -
-      name: Create VPN connection & Connect to it
+      name: Create VPN connection
       shell: pwsh
       env:
         USER: ${{ secrets.EHB_USER}}
@@ -45,6 +45,14 @@ jobs:
       run: | 
        Add-VpnConnection -Name "EHB_VPN" -ServerAddress "dtsslvpn.ehb.be" -TunnelType "SSTP" -AllUserConnection -Force
        rasdial "EHB_VPN" "$env:USER" "$env:SECRET"
+    -
+      name: start VPN connection
+      shell: pwsh
+      env:
+        USER: ${{ secrets.EHB_USER}}
+        SECRET: ${{ secrets.EHB_PASSWORD}}
+      run: | 
+        Get-VpnConnection -Name "EHB_VPN"
        
 
     - name: Run SSH command
