@@ -123,38 +123,33 @@ namespace CanvasRabitMQSenderTests
             Assert.AreEqual(heartbeat.ToString(), objectHeartbeat.ToString());
         }
         [TestMethod]
-        [DeploymentItem("Heartbeat.xsd")]
         public void CheckHeartbeatXSD() {
             Assert.IsTrue(!Program.XSDValidatie(xmlHeartbeat, "heartbeat.xsd"));
         }
         [TestMethod]
-        [DeploymentItem("User.xsd")]
         public void CheckUserXSD()
         {
             Assert.IsTrue(!Program.XSDValidatie(xmlUser, "user.xsd"));
         }
         [TestMethod]
-        [DeploymentItem("Event.xsd")]
         public void CheckEventXSD()
         {
             Assert.IsTrue(!Program.XSDValidatie(xmlEvent, "event.xsd"));
         }
         [TestMethod]
-        [DeploymentItem("Heartbeat.xsd")]
         public void CheckHeartbeatXSDvanObject()
         {
-            Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<Heartbeat>(objectHeartbeat), "Heartbeat.xsd"));
+            Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<Heartbeat>(objectHeartbeat), "heartbeat.xsd"));
         }
         [TestMethod]
         public void CheckUserXSDvanObject()
         {
-            Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<User>(objectUser), "User.xsd"));
+            Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<User>(objectUser), "user.xsd"));
         }
         [TestMethod]
-        [DeploymentItem("Event.xsd")]
         public void CheckEventXSDvanObject()
         {
-            Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<Event>(objectEvent), "Event.xsd"));
+            Assert.IsTrue(!Program.XSDValidatie(XmlController.SerializeToXmlString<Event>(objectEvent), "event.xsd"));
         }
     }
 }
