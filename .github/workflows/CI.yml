@@ -26,12 +26,17 @@ jobs:
     - 
       name: Test
       run: dotnet test
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    steps:
     - 
       name: publish
-      working-directory: CanvasRabitMQSenderTests
+      working-directory: CanvasRabitMQSender
       run: dotnet publish
-
-    - name: Create VPN connection & Connect to it
+    -
+      name: Create VPN connection & Connect to it
       shell: pwsh
       env:
         USER: ${{ secrets.EHB_USER}}
@@ -43,7 +48,7 @@ jobs:
     - name: Copy via ssh
       uses: garygrossgarten/github-action-scp@v0.5.3
       with:
-        local: /home/runner/work/Canvas/Canvas/CanvasRabitMQSenderTests/deploy/
+        local: /home/runner/work/Canvas/Canvas/CanvasRabitMQSender/deploy/
         host: 10.3.17.67
         username: canvas
         passphrase: ${{ secrets.VM_PASSWORD }}
