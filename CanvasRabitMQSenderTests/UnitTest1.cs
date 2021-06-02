@@ -90,19 +90,19 @@ namespace CanvasRabitMQSenderTests
         public void TestEventToXML()
         {
             string xml = XmlController.SerializeToXmlString<Event>(objectEvent);
-            Assert.AreEqual(xml.Trim(), xmlEvent.Trim());
+            Assert.AreEqual(xml.Replace("\n"," ").Replace("\r", " ").Trim(), xmlEvent.Replace("\n", " ").Replace("\r", " ").Trim());
         }
         [TestMethod]
         public void TestUserToXML()
         {
             string xml = XmlController.SerializeToXmlString<User>(objectUser);
-            Assert.AreEqual(xml.Trim(), xmlUser.Trim());
+            Assert.AreEqual(xml.Replace("\n", " ").Replace("\r", " ").Trim(), xmlUser.Replace("\n", " ").Replace("\r", " ").Trim());
         }
         [TestMethod]
         public void TestHeartbeatToXML()
         {
             string xml = XmlController.SerializeToXmlString<Heartbeat>(objectHeartbeat);
-            Assert.AreEqual(xml.Trim(), xmlHeartbeat.Trim());
+            Assert.AreEqual(xml.Replace("\n", " ").Replace("\r", " ").Trim(), xmlHeartbeat.Replace("\n", " ").Replace("\r", " ").Trim());
         }
         [TestMethod]
         public void TestEventFromXML()
