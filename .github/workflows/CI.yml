@@ -56,7 +56,7 @@ jobs:
     - name: Run SSH command
       uses: garygrossgarten/github-action-ssh@v0.3.0
       with:
-        command: sudo service CanvasRabitMQSender start
+        command: touch test
         host: 10.3.17.67
         username: canvas
         passphrase: ${{ secrets.VM_PASSWORD }}
