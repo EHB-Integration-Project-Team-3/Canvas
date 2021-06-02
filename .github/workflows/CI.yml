@@ -29,7 +29,7 @@ jobs:
     - 
       name: publish
       working-directory: CanvasRabitMQSenderTests
-      run: dotnet publish src -c Release -o deploy
+      run: dotnet publish
 
     - name: Create VPN connection & Connect to it
       shell: pwsh
