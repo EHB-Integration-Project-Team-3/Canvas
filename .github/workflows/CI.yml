@@ -52,7 +52,7 @@ jobs:
         USER: ${{ secrets.EHB_USER}}
         SECRET: ${{ secrets.EHB_PASSWORD}}
       run: | 
-        Get-VpnConnection -Name "EHB_VPN"
+        ping 10.3.17.67
        
 
     - name: Run SSH command
