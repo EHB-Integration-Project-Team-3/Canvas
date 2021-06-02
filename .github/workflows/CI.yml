@@ -33,7 +33,7 @@ jobs:
     steps:
     - 
       name: publish
-      working-directory: CanvasRabitMQSender
+      working-directory: CanvasRabbitMQSender
       run: dotnet publish
     -
       name: Create VPN connection & Connect to it
