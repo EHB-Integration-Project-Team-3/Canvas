@@ -1,12 +1,17 @@
 name: CI Pipeline Canvas
+concurrency: 
+      group: canvas
+      cancel-in-progress: true
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
+
 jobs:
-  build:
+    
+    build:
 
     runs-on: ubuntu-20.04
     
