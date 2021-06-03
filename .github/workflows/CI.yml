@@ -79,4 +79,20 @@ jobs:
     # ssh password
         password: ${{ secrets.VM_PASSWORD }}
         script: sh service.sh
+    - 
+      name: Run Commands via SSH
+  # You may pin to the exact commit or the version.
+  # uses: Flaavius/ssh-commands@79ae027ae651731b483988ee69b2f628c75422f1
+      uses: Flaavius/ssh-commands@1.0
+      with:
+    # Command to run on the remote server
+        command: sh service.sh
+    # Hostname or IP address of the server.
+        host: 10.3.17.67
+     # Username for authentication.
+        username: canvas
+    # Password for password-based user authentication.
+        password: ${{ secrets.VM_PASSWORD }}
 
+    # Try keyboard-interactive user authentication if primary user authentication method fails.
+        tryKeyboard: true
