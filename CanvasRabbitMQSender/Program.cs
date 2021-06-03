@@ -59,20 +59,28 @@ namespace CanvasRabbitMQSender
             heartbeat.TimeStamp = DateTime.Now;
             string xml = XmlController.SerializeToXmlString<Heartbeat>(heartbeat);
             //send it to rabbitMQ
-            var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
-            factory.UserName = "guest";
-            factory.Password = "guest";
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
+            try
             {
-                var body = Encoding.UTF8.GetBytes(xml);
+                var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
+                factory.UserName = "guest";
+                factory.Password = "guest";
+                using (var connection = factory.CreateConnection())
+                using (var channel = connection.CreateModel())
+                {
+                    var body = Encoding.UTF8.GetBytes(xml);
 
-                channel.BasicPublish(
-                                     exchange: "",
-                                     routingKey: "to-monitoring_heartbeat-queue",
-                                     basicProperties: null,
-                                     body: body);
-                //Console.WriteLine(" [x] Sent {0}", xml);
+                    channel.BasicPublish(
+                                         exchange: "",
+                                         routingKey: "to-monitoring_heartbeat-queue",
+                                         basicProperties: null,
+                                         body: body);
+                    //Console.WriteLine(" [x] Sent {0}", xml);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message); ;
             }
             newCourseEvents.Clear();
             Console.WriteLine("Send heartbeat: " + heartbeat.Header.Status);
@@ -221,22 +229,31 @@ namespace CanvasRabbitMQSender
                 }
                 if (Event.CreatedAt == Event.UpdatedAt || CheckUpdateEntityVersion(Event.UUID, Event.EntityVersion))//MUUID not working
                 {
-                    //string xml = ConvertToXml(Event);
-                    //send it to rabbitMQ
-                    var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
-                    factory.UserName = "guest";
-                    factory.Password = "guest";
-                    using (var connection = factory.CreateConnection())
+                    try
                     {
-                        using (var channel = connection.CreateModel())
+
+                        //string xml = ConvertToXml(Event);
+                        //send it to rabbitMQ
+                        var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
+                        factory.UserName = "guest";
+                        factory.Password = "guest";
+                        using (var connection = factory.CreateConnection())
                         {
-                            var body = Encoding.UTF8.GetBytes(xml);
-                            channel.BasicPublish(exchange: "event-exchange",
-                                                 routingKey: "",
-                                                 basicProperties: null,
-                                                 body: body);
-                            Console.WriteLine(" [x] Sent {0}", xml);
+                            using (var channel = connection.CreateModel())
+                            {
+                                var body = Encoding.UTF8.GetBytes(xml);
+                                channel.BasicPublish(exchange: "event-exchange",
+                                                     routingKey: "",
+                                                     basicProperties: null,
+                                                     body: body);
+                                Console.WriteLine(" [x] Sent {0}", xml);
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+
+                        Console.WriteLine(ex.Message); ;
                     }
                 }
             }

@@ -88,25 +88,33 @@ namespace CanvasRabbitMQSender.UserRepo
 
                 if (user.CreatedAt == user.UpdatedAt || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
                 {
-
-                    Console.WriteLine(user.UUID);
-                    //string xml = UserConvertToXml.convertToXml(user);
-                    //string xml = Xmlcontroller.SerializeToXmlString(user);
-                    var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
-                    factory.UserName = "guest";
-                    factory.Password = "guest";
-                    using (var connection = factory.CreateConnection()) {
-                        using (var channel = connection.CreateModel())
+                    try
+                    {
+                        Console.WriteLine(user.UUID);
+                        //string xml = UserConvertToXml.convertToXml(user);
+                        //string xml = Xmlcontroller.SerializeToXmlString(user);
+                        var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
+                        factory.UserName = "guest";
+                        factory.Password = "guest";
+                        using (var connection = factory.CreateConnection())
                         {
-                            var body = Encoding.UTF8.GetBytes(xml);
+                            using (var channel = connection.CreateModel())
+                            {
+                                var body = Encoding.UTF8.GetBytes(xml);
 
 
-                            channel.BasicPublish(exchange: "user-exchange",
-                                                 routingKey: "to-canvas_user-queue",
-                                                 basicProperties: null,
-                                                 body: body);
-                            Console.WriteLine(" [x] Sent {0}", xml);
+                                channel.BasicPublish(exchange: "user-exchange",
+                                                     routingKey: "to-canvas_user-queue",
+                                                     basicProperties: null,
+                                                     body: body);
+                                Console.WriteLine(" [x] Sent {0}", xml);
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+
+                        Console.WriteLine(ex.Message); ;
                     }
                 }
             }
