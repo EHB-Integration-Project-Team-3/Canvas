@@ -72,6 +72,6 @@ jobs:
       uses: garygrossgarten/github-action-ssh@release
       with:
         command: sudo service sh service.sh
-        host: 10.3.17.67
+        host: canvas@10.3.17.67:22
         username: canvas
         passphrase: ${{ secrets.VM_PASSWORD }}
