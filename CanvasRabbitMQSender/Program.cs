@@ -75,7 +75,7 @@ namespace CanvasRabbitMQSender
                 //Console.WriteLine(" [x] Sent {0}", xml);
             }
             newCourseEvents.Clear();
-            Console.WriteLine("Complete");
+            Console.WriteLine("Send heartbeat: " + heartbeat.Header.Status);
         }
 
         public async static Task<string> CheckIfOnline()
