@@ -1,7 +1,5 @@
 name: CI Pipeline Canvas
-concurrency: 
-      group: canvas
-      cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
@@ -11,10 +9,8 @@ on:
 
 jobs:
     
-    build:
-
+  build:
     runs-on: ubuntu-20.04
-    
     steps:
     - uses: actions/checkout@v2
     - 
@@ -43,6 +39,9 @@ jobs:
         name: .net-app
         path: ${{env.DOTNET_ROOT}}/myapp
   deploy:
+    concurrency: 
+      group: canvas
+      cancel-in-progress: true
     runs-on: windows-latest
     needs: build
     steps:
