@@ -218,89 +218,7 @@ namespace CanvasRabbitMQReceiver
             int courseNumber = 5;
             int rootAccId = 2;
             int userId = 1;
-            using (NpgsqlConnection connection = new NpgsqlConnection(constring))
-            {
-                NpgsqlCommand fetchId = new NpgsqlCommand(sqlFetchId, connection);
-                var organiserUUID = fetchId.Parameters.Add("@uuid", NpgsqlTypes.NpgsqlDbType.Text);
-                connection.Open();
-                fetchId.Parameters.Add("@uuid", NpgsqlTypes.NpgsqlDbType.Text);
-                organiserUUID.Value = canvasEvent.OrganiserId;
-                fetchId.Prepare();
-
-                Console.WriteLine(fetchId);
-
-                using (NpgsqlDataReader reader = fetchId.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        int id = reader.GetOrdinal("id");
-                        
-                    }
-
-                }
-
-                connection.Close();
-
-
-                NpgsqlCommand command1 = new NpgsqlCommand(sqlCreate, connection);
-                var context_id = command1.Parameters.Add("@context_id", NpgsqlTypes.NpgsqlDbType.Bigint);
-                var context_type = command1.Parameters.Add("@context_type", NpgsqlTypes.NpgsqlDbType.Text);
-                var title = command1.Parameters.Add("@title", NpgsqlTypes.NpgsqlDbType.Text);
-                var location_name = command1.Parameters.Add("@location_name", NpgsqlTypes.NpgsqlDbType.Text);
-                var location_address = command1.Parameters.Add("@location_address", NpgsqlTypes.NpgsqlDbType.Text);
-                var start_at = command1.Parameters.Add("@start_at", NpgsqlTypes.NpgsqlDbType.Date);
-                var end_at = command1.Parameters.Add("@end_at", NpgsqlTypes.NpgsqlDbType.Date);
-                var workflow_state = command1.Parameters.Add("@workflow_state", NpgsqlTypes.NpgsqlDbType.Text);
-                var user_id = command1.Parameters.Add("@user_id", NpgsqlTypes.NpgsqlDbType.Bigint);
-                var created_at = command1.Parameters.Add("@created_at", NpgsqlTypes.NpgsqlDbType.Date);
-                var updated_at = command1.Parameters.Add("@updated_at", NpgsqlTypes.NpgsqlDbType.Date);
-                var context_code = command1.Parameters.Add("@context_code", NpgsqlTypes.NpgsqlDbType.Text);
-                var root_account_id = command1.Parameters.Add("@root_account_id", NpgsqlTypes.NpgsqlDbType.Bigint);
-
-                NpgsqlCommand command2 = new NpgsqlCommand(sqlSection, connection);
-
-
-                connection.Open();
-
-                context_id.Value = courseNumber;
-                context_type.Value = "Course";
-                title.Value = canvasEvent.Title;
-                location_name.Value = canvasEvent.LocationName;
-                location_address.Value = canvasEvent.LocationAddress;
-                workflow_state.Value = "active";
-                start_at.Value = canvasEvent.StartAt;
-                end_at.Value = canvasEvent.EndAt;
-                user_id.Value = userId;
-                created_at.Value = canvasEvent.CreatedAt;
-                updated_at.Value = canvasEvent.UpdatedAt;
-                context_code.Value = "Events-Desiderius";
-                root_account_id.Value = rootAccId;
-                command1.Prepare();
-
-                command1.ExecuteNonQuery();
-
-                var course_id = command2.Parameters.Add("@course_id", NpgsqlTypes.NpgsqlDbType.Bigint);
-                root_account_id = command2.Parameters.Add("@root_account_id", NpgsqlTypes.NpgsqlDbType.Bigint);
-                var name = command2.Parameters.Add("@name", NpgsqlTypes.NpgsqlDbType.Text);
-                created_at = command2.Parameters.Add("@created_at", NpgsqlTypes.NpgsqlDbType.Date);
-                updated_at = command2.Parameters.Add("@updated_at", NpgsqlTypes.NpgsqlDbType.Date);
-                workflow_state = command2.Parameters.Add("@workflow_state", NpgsqlTypes.NpgsqlDbType.Text);
-                course_id.Value = courseNumber;
-                root_account_id.Value = rootAccId;
-                name.Value = canvasEvent.Title;
-                created_at.Value = canvasEvent.CreatedAt;
-                updated_at.Value = canvasEvent.UpdatedAt;
-                workflow_state.Value = "active";
-                command2.Prepare();
-
-                command2.ExecuteNonQuery();
-
-                connection.Close();
-                //var test = DateTime.Now.AddSeconds(-5);
-                //InsertMUUID("EVENT", canvasEvent.UUID);
-
-
-            }
+            
 
         }
         static void UpdateEvent(Event canvasEvent)
@@ -619,5 +537,31 @@ namespace CanvasRabbitMQReceiver
 
         public static void DeleteMUUID() { }
 
+        public static int FetchLocalId(String uuid) {
+            String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
+            String sqlFetchId = "SELECT id FROM users WHERE  uuid = @uuid";
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(constring))
+            {
+
+                using (NpgsqlCommand command = connection.CreateCommand())
+                {
+                    command.Parameters.AddWithValue("@uuid", uuid);
+                    command.CommandText = sqlFetchId;
+                    connection.Open();
+
+                    using (NpgsqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            id= reader.GetInt32(0);
+
+                        }
+
+                    }
+                    connection.Close();
+                }
+            }return id;
+        }
         }
     } 
