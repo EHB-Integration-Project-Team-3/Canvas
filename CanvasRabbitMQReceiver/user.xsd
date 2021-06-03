@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="user">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="header">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="method">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="CREATE" />
+										<xs:enumeration value="UPDATE" />
+										<xs:enumeration value="DELETE" />
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+							<xs:element name="source">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="CANVAS" />
+										<xs:enumeration value="FRONTEND" />
+										<xs:enumeration value="PLANNING" />
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="uuid" minOccurs="1" nillable="false">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:pattern value="[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="entityVersion" type="xs:int"/>
+				<xs:element name="lastName" minOccurs="1" nillable="false">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="60" />
+							<xs:pattern value="^(?!\s*$).+" />
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="firstName" minOccurs="1" nillable="false">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:maxLength value="60" />
+							<xs:pattern value="^(?!\s*$).+" />
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="emailAddress" minOccurs="1" nillable="false">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:pattern value="([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+				<xs:element name="role">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="student" />
+							<xs:enumeration value="lecturer" />
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

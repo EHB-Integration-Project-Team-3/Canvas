@@ -30,13 +30,13 @@ namespace CanvasRabbitMQReceiver
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 Console.WriteLine(message);
-                Event canvasEvent;
-                canvasEvent = Xmlcontroller.DeserializeXmlString<Event>(message);
-                switch (canvasEvent.Header.Method) {
-                    case "CREATE":
+                @event canvasEvent;
+                canvasEvent = Xmlcontroller.DeserializeXmlString<@event>(message);
+                switch (canvasEvent.header.method) {
+                    case eventHeaderMethod.CREATE:
                         try
                         {
-                            if (CheckMUUID(canvasEvent.UUID) == false) { CreateEvent(canvasEvent); }
+                            if (CheckMUUID(canvasEvent.uuid) == false) { CreateEvent(canvasEvent); }
                         }
                         catch (Exception ex)
                         {
@@ -45,10 +45,10 @@ namespace CanvasRabbitMQReceiver
 
 
                         break;
-                    case "UPDATE":
+                    case eventHeaderMethod.UPDATE:
                         try
                         {
-                            if (UpdateMUUID(canvasEvent.UUID, canvasEvent.EntityVersion)) { UpdateEvent(canvasEvent); }
+                            if (UpdateMUUID(canvasEvent.uuid, canvasEvent.entityVersion)) { UpdateEvent(canvasEvent); }
                         }
                         catch (Exception ex)
                         {
@@ -56,7 +56,7 @@ namespace CanvasRabbitMQReceiver
                         }
 
                         break;
-                    case "DELETE":
+                    case eventHeaderMethod.DELETE:
                         try
                         {
                             DeleteEvent(canvasEvent);
@@ -74,7 +74,7 @@ namespace CanvasRabbitMQReceiver
 
 
 
-                Console.WriteLine(" [x] Received Event " + canvasEvent.Header.Method + " " + canvasEvent.Title);
+                Console.WriteLine(" [x] Received Event " + canvasEvent.header.method + " " + canvasEvent.title);
             };
             channel.BasicConsume(queue: "to-canvas_event-queue",
                                  autoAck: true,
@@ -91,16 +91,16 @@ namespace CanvasRabbitMQReceiver
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                User canvasUser;
+                user canvasUser;
 
-                canvasUser = Xmlcontroller.DeserializeXmlString<User>(message);
+                canvasUser = Xmlcontroller.DeserializeXmlString<user>(message);
                 Console.WriteLine(message);
-                switch (canvasUser.Header.Method)
+                switch (canvasUser.header.method)
                 {
-                    case "CREATE":
+                    case userHeaderMethod.CREATE:
                         try
                         {
-                            if (CheckMUUID(canvasUser.UUID) == false) { CreateUser(canvasUser); }
+                            if (CheckMUUID(canvasUser.uuid) == false) { CreateUser(canvasUser); }
                         }
                         catch (Exception ex)
                         {
@@ -108,11 +108,11 @@ namespace CanvasRabbitMQReceiver
                         }
 
                         break;
-                    case "UPDATE":
+                    case userHeaderMethod.UPDATE:
                         
                             try
                             {
-                                if (UpdateMUUID(canvasUser.UUID, canvasUser.EntityVersion)) { UpdateUser(canvasUser); }
+                                if (UpdateMUUID(canvasUser.uuid, canvasUser.entityVersion)) { UpdateUser(canvasUser); }
                                 
                             }
                             catch (Exception ex)
@@ -124,7 +124,7 @@ namespace CanvasRabbitMQReceiver
 
 
                         break;
-                    case "DELETE":
+                    case userHeaderMethod.DELETE:
                         try
                         {
                             DeleteUser(canvasUser);
@@ -141,13 +141,14 @@ namespace CanvasRabbitMQReceiver
 
                 }
 
-                Console.WriteLine(" [x] Received User " + canvasUser.Header.Method + " " + canvasUser.Lastname + " " + canvasUser.Firstname);
+                Console.WriteLine(" [x] Received User " + canvasUser.header.method + " " + canvasUser.lastName + " " + canvasUser.firstName);
             };
             channel.BasicConsume(queue: "to-canvas_user-queue",
                                  autoAck: true,
                                  consumer: consumerUser);
+            
             //Attendance Consumer
-            /*channel3.QueueDeclare(queue: "to-canvas_attendance-queue",
+            channel3.QueueDeclare(queue: "to-canvas_attendance-queue",
                                  durable: true,
                                  exclusive: false,
                                  autoDelete: false,
@@ -157,13 +158,13 @@ namespace CanvasRabbitMQReceiver
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                Attendance canvasAttendance;
+                attendance canvasAttendance;
 
-                canvasAttendance = Xmlcontroller.DeserializeXmlString<Attendance>(message);
+                canvasAttendance = Xmlcontroller.DeserializeXmlString<attendance>(message);
                 Console.WriteLine(message);
-                switch (canvasAttendance.Header.Method)
+                switch (canvasAttendance.header.method)
                 {
-                    case "CREATE":
+                    case attendanceHeaderMethod.CREATE:
                         try
                         {
                             
@@ -174,7 +175,7 @@ namespace CanvasRabbitMQReceiver
                         }
 
                         break;
-                    case "UPDATE":
+                    case attendanceHeaderMethod.DELETE:
                         
                         {
                             try
@@ -190,10 +191,7 @@ namespace CanvasRabbitMQReceiver
 
 
                         break;
-                    case "DELETE":
-                        Console.WriteLine("delete failed");
-
-                        break;
+                    
                     default:
                         Console.WriteLine("header reading failed");
                         break;
@@ -204,7 +202,7 @@ namespace CanvasRabbitMQReceiver
             };
             channel.BasicConsume(queue: "to-canvas_attendance-queue",
                                  autoAck: true,
-                                 consumer: consumerAttendance);*/
+                                 consumer: consumerAttendance);
 
 
 
@@ -221,7 +219,7 @@ namespace CanvasRabbitMQReceiver
         }
 
 
-        static void CreateEvent(Event canvasEvent)
+        static void CreateEvent(@event canvasEvent)
         {
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
             String sqlEvent = "INSERT INTO public.calendar_events(id,user_id,context_code,context_id,start_at,end_at,context_type,title,location_name,location_address,workflow_state,created_at,updated_at,root_account_id,uuid) VALUES " +
@@ -231,7 +229,7 @@ namespace CanvasRabbitMQReceiver
 
             int courseNumber = 5;
             int rootAccId = 2;
-            int localId = FetchLocalId(canvasEvent.OrganiserId,0);
+            int localId = FetchLocalId(canvasEvent.organiserId,0);
 
 
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
@@ -242,17 +240,17 @@ namespace CanvasRabbitMQReceiver
                     command.Parameters.AddWithValue("@user_id", localId);
                     command.Parameters.AddWithValue("@context_code", "course_5");
                     command.Parameters.AddWithValue("@context_id", courseNumber);
-                    command.Parameters.AddWithValue("@start_at", canvasEvent.StartAt);
-                    command.Parameters.AddWithValue("@end_at", canvasEvent.EndAt);
+                    command.Parameters.AddWithValue("@start_at", canvasEvent.start);
+                    command.Parameters.AddWithValue("@end_at", canvasEvent.end);
                     command.Parameters.AddWithValue("@context_type", "Course");
-                    command.Parameters.AddWithValue("@title", canvasEvent.Title);
-                    command.Parameters.AddWithValue("@location_name", canvasEvent.LocationName);
-                    command.Parameters.AddWithValue("@location_address", canvasEvent.LocationAddress);
+                    command.Parameters.AddWithValue("@title", canvasEvent.title);
+                    command.Parameters.AddWithValue("@location_name", canvasEvent.location);
+                    command.Parameters.AddWithValue("@location_address", canvasEvent.location);
                     command.Parameters.AddWithValue("@workflow_state", "active");
-                    command.Parameters.AddWithValue("@created_at", canvasEvent.CreatedAt);
-                    command.Parameters.AddWithValue("@updated_at", canvasEvent.UpdatedAt);
+                    command.Parameters.AddWithValue("@created_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
                     command.Parameters.AddWithValue("@root_account_id", rootAccId);
-                    command.Parameters.AddWithValue("@uuid", canvasEvent.UUID);
+                    command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
 
 
                     command.CommandText = sqlEvent;
@@ -268,9 +266,9 @@ namespace CanvasRabbitMQReceiver
                     {
                         command.Parameters.AddWithValue("@context_id", courseNumber);
                         command.Parameters.AddWithValue("@root_account_id", rootAccId);
-                        command.Parameters.AddWithValue("@name", canvasEvent.Title);
-                        command.Parameters.AddWithValue("@created_at", canvasEvent.CreatedAt);
-                        command.Parameters.AddWithValue("@updated_at", canvasEvent.UpdatedAt);
+                        command.Parameters.AddWithValue("@name", canvasEvent.title);
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
                         command.Parameters.AddWithValue("@workflow_state", "active");
 
                         command.CommandText = sqlSection;
@@ -282,12 +280,12 @@ namespace CanvasRabbitMQReceiver
                 }
             
 
-            InsertMUUID("USER", canvasEvent.UUID, localId);
+            InsertMUUID("USER", canvasEvent.uuid, localId);
 
 
 
         }
-        static void UpdateEvent(Event canvasEvent)
+        static void UpdateEvent(@event canvasEvent)
         {
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
             String sqlEvent = "UPDATE public.calendar_events SET user_id=@user_id,start_at=@start_at,end_at=@end_at,title=@title,location_name=@location_name,location_address=@location_address,updated_at=@updated_at,entityversion=entityversion+1" +
@@ -295,8 +293,8 @@ namespace CanvasRabbitMQReceiver
             String sqlSection = "UPDATE course_sections SET updated_at=@updated_at,name=@name" +
                 "WHERE name=@oldname";
 
-            int localId = FetchLocalId(canvasEvent.UUID,0);
-            String localName = FetchLocalName(canvasEvent.UUID);
+            int localId = FetchLocalId(canvasEvent.uuid,0);
+            String localName = FetchLocalName(canvasEvent.uuid);
 
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             {
@@ -304,13 +302,13 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connection.CreateCommand())
                 {
                     command.Parameters.AddWithValue("@user_id", localId);
-                    command.Parameters.AddWithValue("@start_at", canvasEvent.StartAt);
-                    command.Parameters.AddWithValue("@end_at", canvasEvent.EndAt);
-                    command.Parameters.AddWithValue("@title", canvasEvent.Title);
-                    command.Parameters.AddWithValue("@location_name", canvasEvent.LocationName);
-                    command.Parameters.AddWithValue("@location_address", canvasEvent.LocationAddress);
-                    command.Parameters.AddWithValue("@updated_at", canvasEvent.UpdatedAt);
-                    command.Parameters.AddWithValue("@uuid", canvasEvent.UUID);
+                    command.Parameters.AddWithValue("@start_at", canvasEvent.start);
+                    command.Parameters.AddWithValue("@end_at", canvasEvent.end);
+                    command.Parameters.AddWithValue("@title", canvasEvent.title);
+                    command.Parameters.AddWithValue("@location_name", canvasEvent.location);
+                    command.Parameters.AddWithValue("@location_address", canvasEvent.location);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
                     command.CommandText = sqlEvent;
                     connection.Open();
                     command.ExecuteNonQuery();
@@ -323,8 +321,8 @@ namespace CanvasRabbitMQReceiver
 
                 using (NpgsqlCommand command = connectionSection.CreateCommand())
                 {
-                    command.Parameters.AddWithValue("@name", canvasEvent.Title);
-                    command.Parameters.AddWithValue("@updated_at", canvasEvent.UpdatedAt);
+                    command.Parameters.AddWithValue("@name", canvasEvent.title);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
                     command.Parameters.AddWithValue("@oldname", localName);
                     command.CommandText = sqlSection;
                     connectionSection.Open();
@@ -335,13 +333,13 @@ namespace CanvasRabbitMQReceiver
 
 
             }
-            static void DeleteEvent(Event canvasEvent) {
+            static void DeleteEvent(@event canvasEvent) {
 
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
             String sqlEvent = "UPDATE public.calendar_events SET deleted_at=@deleted_at,updated_at,@updated_at,workflow_state=@workflow_state" +
                 "WHERE uuid=@uuid";
-            String sqlSection = "UPDATE public.course_sections SET @updated_at,workflow_state=@workflow_state WHERE name=@name";
-            int localId = FetchLocalId(canvasEvent.UUID,0);
+            String sqlSection = "UPDATE public.course_sections SET updated_at=@updated_at,workflow_state=@workflow_state WHERE name=@name";
+            int localId = FetchLocalId(canvasEvent.uuid,0);
 
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             {
@@ -349,10 +347,10 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connection.CreateCommand())
                 {
                    
-                    command.Parameters.AddWithValue("@deleted_at", canvasEvent.LocationAddress);
-                    command.Parameters.AddWithValue("@updated_at", canvasEvent.UpdatedAt);
+                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
                     command.Parameters.AddWithValue("@workflow_state", "deleted");
-                    command.Parameters.AddWithValue("@uuid", canvasEvent.UUID);
+                    command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
 
                     command.CommandText = sqlEvent;
                     connection.Open();
@@ -366,10 +364,10 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connectionSection.CreateCommand())
                 {
 
-                    command.Parameters.AddWithValue("@deleted_at", canvasEvent.LocationAddress);
-                    command.Parameters.AddWithValue("@updated_at", canvasEvent.UpdatedAt);
+                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
                     command.Parameters.AddWithValue("@workflow_state", "deleted");
-                    command.Parameters.AddWithValue("@name", canvasEvent.Title);
+                    command.Parameters.AddWithValue("@name", canvasEvent.title);
                     command.CommandText = sqlSection;
                     connectionSection.Open();
                     command.ExecuteNonQuery();
@@ -378,7 +376,7 @@ namespace CanvasRabbitMQReceiver
             }
         }
 
-            static void CreateUser(User canvasUser) {
+            static void CreateUser(@user canvasUser) {
                 String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
                 String sqlCreate = "INSERT INTO public.users(id,name,sortable_name,workflow_state,muuid,created_at,updated_at,short_name,muuid) VALUES " +
         "(nextval ('users_id_seq'::regclass),@name,@sortable_name,@workflow_state,@uuid,@created_at,@updated_at,@short_name,@muuid)";
@@ -390,13 +388,13 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connectionSection.CreateCommand())
                 {
 
-                    command.Parameters.AddWithValue("@name", canvasUser.Lastname + " " + canvasUser.Firstname);
-                    command.Parameters.AddWithValue("@sortable_name", canvasUser.Lastname + ", " + canvasUser.Firstname);
+                    command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
+                    command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
                     command.Parameters.AddWithValue("@workflow_state", "registered");
-                    command.Parameters.AddWithValue("@created_at", canvasUser.CreatedAt);
-                    command.Parameters.AddWithValue("@updated_at", canvasUser.UpdatedAt);
-                    command.Parameters.AddWithValue("@short_name", canvasUser.Firstname + ", " + canvasUser.Lastname);
-                    command.Parameters.AddWithValue("@muuid", canvasUser.UUID);
+                    command.Parameters.AddWithValue("@created_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@updated_at",DateTime.Now);
+                    command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
+                    command.Parameters.AddWithValue("@muuid", canvasUser.uuid);
 
                     command.CommandText = sqlCreate;
                     connectionSection.Open();
@@ -404,12 +402,12 @@ namespace CanvasRabbitMQReceiver
                     connectionSection.Close();
                 }
             }
-            int localId = FetchLocalId(canvasUser.UUID, 1);
+            int localId = FetchLocalId(canvasUser.uuid, 1);
 
-            InsertMUUID("USER", canvasUser.UUID, localId);
+            InsertMUUID("USER", canvasUser.uuid, localId);
 
         }
-        static void UpdateUser(User canvasUser)
+        static void UpdateUser(user canvasUser)
             {
                 String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
                 String sqlUpdate = "UPDATE public.users SET name=@name,sortable_name=@sortable_name,workflow_state=@workflow_state,created_at=@created_at,updated_at=@updated_at,short_name=@short_name" +
@@ -421,11 +419,11 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connection.CreateCommand())
                 {
 
-                    command.Parameters.AddWithValue("@name", canvasUser.Lastname + " " + canvasUser.Firstname);
-                    command.Parameters.AddWithValue("@sortable_name", canvasUser.Lastname + ", " + canvasUser.Firstname);
-                    command.Parameters.AddWithValue("@updated_at", canvasUser.UpdatedAt);
-                    command.Parameters.AddWithValue("@short_name", canvasUser.Firstname + ", " + canvasUser.Lastname);
-                    command.Parameters.AddWithValue("@uuid", canvasUser.UUID);
+                    command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
+                    command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
+                    command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
 
                     command.CommandText = sqlUpdate;
                     connection.Open();
@@ -434,7 +432,7 @@ namespace CanvasRabbitMQReceiver
                 }
             }
         }
-            static void DeleteUser(User canvasUser) {
+            static void DeleteUser(@user canvasUser) {
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
 
             String sqlDelete = "UPDATE public.users SET deleted_at=@deleted_at,updated_at,@updated_at,workflow_state=@workflow_state" +
@@ -446,11 +444,11 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connection.CreateCommand())
                 {
 
-                    command.Parameters.AddWithValue("@deleted_at", canvasUser.UpdatedAt);
+                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
                     command.Parameters.AddWithValue("@workflow_state", "deleted");
-                    command.Parameters.AddWithValue("@updated_at", canvasUser.UpdatedAt);
-                    command.Parameters.AddWithValue("@short_name", canvasUser.Firstname + ", " + canvasUser.Lastname);
-                    command.Parameters.AddWithValue("@uuid", canvasUser.UUID);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
+                    command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
 
                     command.CommandText = sqlDelete;
                     connection.Open();
