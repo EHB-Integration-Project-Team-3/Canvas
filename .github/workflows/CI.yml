@@ -1,6 +1,6 @@
 name: CI Pipeline Canvas
 concurrency: 
-      group: ${{ github.head_ref }}
+      group: canvas
       cancel-in-progress: true
 on:
   push:
