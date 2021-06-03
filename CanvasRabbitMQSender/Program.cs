@@ -91,7 +91,7 @@ namespace CanvasRabbitMQSender
                 return "ONLINE";
             }
         }
-        public async static void TimedEventSendEvent(Object source, ElapsedEventArgs arg)
+        public static void TimedEventSendEvent(Object source, ElapsedEventArgs arg)
         {
             //try
             //{
@@ -507,26 +507,31 @@ namespace CanvasRabbitMQSender
         }
         public static bool XSDValidatie(string xml, string xsd)
         {
+
+            Console.WriteLine("i get here 6");
             XmlSchemaSet xmlSchema = new XmlSchemaSet();
             try
             {
                 xmlSchema.Add("", Environment.CurrentDirectory + "/" + xsd);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 xmlSchema.Add("", Environment.CurrentDirectory + "/../../../" + xsd);
             }
 
             bool validationErrors = false;
+            Console.WriteLine("i get here 7");
 
             XDocument doc = XDocument.Parse(xml);
 
             doc.Validate(xmlSchema, (sender, args) =>
             {
-                var test = xml;
                 Console.WriteLine("Error Message: " + args.Message);
                 validationErrors = true;
             });
+
+            Console.WriteLine("i get here" + (validationErrors.ToString()));
             return validationErrors;
         }
     }
