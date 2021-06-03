@@ -57,9 +57,9 @@ namespace CanvasRabbitMQSender.UserRepo
                       }
                     if (dr.GetString(dr.GetOrdinal("workflow_state")) == "deleted") {
                         user.Header.Method = "DELETE";
-
-                    } else { 
-                        if (user.CreatedAt == user.UpdatedAt)
+                    } 
+                    else { 
+                        if (user.CreatedAt.CompareTo(user.UpdatedAt) < 10 )
                         {
                             user.Header.Method = "CREATE";
                         }

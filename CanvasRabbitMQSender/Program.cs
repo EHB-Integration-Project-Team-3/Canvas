@@ -361,7 +361,8 @@ namespace CanvasRabbitMQSender
             string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid;  database=masteruuid;";
             string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid;  database=masteruuid;";
             string sql = "SELECT UUID()";
-            string sql2 = "INSERT INTO master (UUID,Source_EntityId,EntityType,Source)VALUES(UUID_TO_BIN(@uuid),'@id','@type','Canvas'); ";
+            string sql2 = "INSERT INTO master (UUID,Source_EntityId,EntityType,Source )VALUES( UUID_TO_BIN( @Uuid), @Id, @Type, 'CANVAS'); ";
+
             string uuid = "";
 
             try
@@ -386,10 +387,10 @@ namespace CanvasRabbitMQSender
                     connection.Open();
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        command.Parameters.AddWithValue("uuid", uuid);
-                        command.Parameters.AddWithValue("type", type);
-                        command.Parameters.AddWithValue("id", id);
                         command.CommandText = sql2;
+                        command.Parameters.AddWithValue("@Uuid", uuid);
+                        command.Parameters.AddWithValue("@Type", type);
+                        command.Parameters.AddWithValue("@Id", id);
                         command.ExecuteNonQuery();
                     }
                     connection.Close();
@@ -421,11 +422,11 @@ namespace CanvasRabbitMQSender
                         connection.Open();
                         using (MySqlCommand command = connection.CreateCommand())
                         {
-                            command.Parameters.AddWithValue("uuid", uuid);
-                            command.Parameters.AddWithValue("type", type);
-                            command.Parameters.AddWithValue("id", id);
                             command.CommandText = sql2;
-                            command.ExecuteNonQuery();
+                            command.Parameters.AddWithValue("?Uuid", uuid);
+                            command.Parameters.AddWithValue("?Type", type);
+                            command.Parameters.AddWithValue("?Id", id);
+                            command.ExecuteReader();
                         }
                         connection.Close();
                     }
@@ -445,14 +446,14 @@ namespace CanvasRabbitMQSender
         {
             string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid; database=masteruuid;";
             string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid; database=masteruuid;";
-            string sql = "update master set EntityVersion = @entityversion " +
+            string sql = "update master set EntityVersion = @Entityversion " +
                 "where Source = @MyService and " +
-                "EntityVersion = @entityversion - 1 and " +
-                "UUID = UUID_TO_BIN(@uuid) and " +
-                "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = UUID_TO_BIN(@uuid)) or " +
-                "(select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = UUID_TO_BIN(@uuid)) < @entityversion) and " +
+                "EntityVersion = @Entityversion - 1 and " +
+                "UUID = UUID_TO_BIN(@Uuid) and " +
+                "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = UUID_TO_BIN(@Uuid)) or " +
+                "(select EntityVersion from masteruuid.master where Source = @ServiceX and UUID = UUID_TO_BIN(@Uuid)) < @Entityversion) and " +
                 "(NOT EXISTS (select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = BIN(@uuid)) or" +
-                "(select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = UUID_TO_BIN(@uuid)) < @entityversion);";
+                "(select EntityVersion from masteruuid.master where Source = @ServiceY and UUID = UUID_TO_BIN(@Uuid)) < @Entityversion);";
             bool edited = false;
             try
             {
@@ -461,9 +462,9 @@ namespace CanvasRabbitMQSender
                     connection.Open();
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        command.Parameters.AddWithValue("entityversion", entityversion);
-                        command.Parameters.AddWithValue("uuid", uuid);
-                        command.Parameters.AddWithValue("MyService", "Canvas");
+                        command.Parameters.AddWithValue("Entityversion", entityversion);
+                        command.Parameters.AddWithValue("Uuid", uuid);
+                        command.Parameters.AddWithValue("MyService", "CANVAS");
                         command.Parameters.AddWithValue("ServiceX", "Frontend");
                         command.Parameters.AddWithValue("Servicey", "Planning");
                         command.CommandText = sql;
@@ -486,9 +487,9 @@ namespace CanvasRabbitMQSender
                         {
                             command.Parameters.AddWithValue("entityversion", entityversion);
                             command.Parameters.AddWithValue("uuid", uuid);
-                            command.Parameters.AddWithValue("MyService", "Canvas");
-                            command.Parameters.AddWithValue("ServiceX", "Frontend");
-                            command.Parameters.AddWithValue("Servicey", "Planning");
+                            command.Parameters.AddWithValue("MyService", "CANVAS");
+                            command.Parameters.AddWithValue("ServiceX", "FRONTEND");
+                            command.Parameters.AddWithValue("Servicey", "PLANNING");
                             command.CommandText = sql;
                             edited = command.ExecuteNonQuery() == 1;
                         }
