@@ -461,7 +461,9 @@ namespace CanvasRabbitMQSender
 
         public static bool CheckUpdateEntityVersion(string uuid, int entityversion)
         {
-                string sql = "update master set EntityVersion = @Entityversion " +
+            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid; database=masteruuid;";
+            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid; database=masteruuid;";
+            string sql = "update master set EntityVersion = @Entityversion " +
                 "where Source = @MyService and " +
                 "EntityVersion = @Entityversion - 1 and " +
                 "UUID = UUID_TO_BIN(@Uuid) and " +

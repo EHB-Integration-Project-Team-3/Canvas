@@ -130,7 +130,6 @@ namespace CanvasRabbitMQSender.UserRepo
         public static int GetEntityVersion(string uuid)
         {
             string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid; database=masteruuid;";
-            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid; database=masteruuid;";
             string sqlen = "select EntityVersion from master where UUID = UUID_TO_BIN(@Uuid) and Source = @MyService ";
             int entityversion = 1;
             try
