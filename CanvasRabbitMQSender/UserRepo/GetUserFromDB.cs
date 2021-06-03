@@ -58,8 +58,9 @@ namespace CanvasRabbitMQSender.UserRepo
                     if (dr.GetString(dr.GetOrdinal("workflow_state")) == "deleted") {
                         user.Header.Method = "DELETE";
                     } 
-                    else { 
-                        if (user.CreatedAt.CompareTo(user.UpdatedAt) < 10 )
+                    else {
+                        TimeSpan verschil = user.UpdatedAt - user.CreatedAt;
+                        if (verschil.TotalSeconds < 10 )
                         {
                             user.Header.Method = "CREATE";
                         }
@@ -86,7 +87,7 @@ namespace CanvasRabbitMQSender.UserRepo
                     continue;
                 }
 
-                if (user.CreatedAt == user.UpdatedAt || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
+                if (user.Header.Method == "CREATE" || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
                 {
                     try
                     {
@@ -116,6 +117,9 @@ namespace CanvasRabbitMQSender.UserRepo
 
                         Console.WriteLine(ex.Message); ;
                     }
+                }
+                else {
+                    Console.WriteLine("entityversion not correct");
                 }
             }
             users.Clear();
