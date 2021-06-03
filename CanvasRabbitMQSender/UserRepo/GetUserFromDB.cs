@@ -77,7 +77,6 @@ namespace CanvasRabbitMQSender.UserRepo
                     user.Header.Method = "CREATE";
                     //user.UUID = Uuid.GetUUID();
                     users.Add(user);
-                    Console.WriteLine(user.UUID);
                 }
 
                 connection.Close();
@@ -95,6 +94,7 @@ namespace CanvasRabbitMQSender.UserRepo
                 }
                 if (user.CreatedAt == user.UpdatedAt || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
                 {
+                    Console.WriteLine(user.UUID);
                     //string xml = UserConvertToXml.convertToXml(user);
                     //string xml = Xmlcontroller.SerializeToXmlString(user);
                     var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
