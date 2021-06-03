@@ -30,12 +30,22 @@ jobs:
     - 
       name: publish
       working-directory: CanvasRabbitMQSender
-      run: dotnet publish
-
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+    - 
+      name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v2
+      with:
+        name: .net-app
+        path: ${{env.DOTNET_ROOT}}/myapp
   deploy:
     runs-on: windows-latest
     needs: build
     steps:
+    - 
+      name: Download artifact from build job
+      uses: actions/download-artifact@v2
+      with:
+        name: .net-app
     -
       name: Create VPN connection
       shell: pwsh
@@ -45,10 +55,7 @@ jobs:
       run: | 
        Add-VpnConnection -Name "EHB_VPN" -ServerAddress "dtsslvpn.ehb.be" -TunnelType "SSTP" -AllUserConnection -Force
        rasdial "EHB_VPN" "$env:USER" "$env:SECRET"
-       
-    - name: publish
-      working-directory: CanvasRabbitMQSender
-      run: dotnet publish
+
        
     - name: FTP Deploy
         #You may pin to the exact commit or the version.
@@ -59,39 +66,20 @@ jobs:
         username: ftpuser
         password: ubuntu123
         port: 21
-        local-dir: /home/runner/work/Canvas/Canvas/CanvasRabittMQSender/deploy/
-        server-dir: /home/ftpuser/ftp/files/
-
-   # - name: git-ftp-action
+    - 
+      name: Run Commands via SSH
   # You may pin to the exact commit or the version.
-  # uses: sebastianpopp/git-ftp-action@33a94c0e0fce59ca477baa9d1748a5f2e53fb429
-     # uses: sebastianpopp/git-ftp-action@3.0.0
-     # with:
-    # URL
-       # url: ftp://10.3.17.67
-    # FTP login name
-       # user: ftpuser
-    # FTP password
-       # password: ubuntu123
-    # Specifies a local directory to sync from as if it were the git project root path.
-       # syncroot: /home/ftpuser/ftp/files
-    
-       
-       
-    #- name: ls -a via OPEN SSH Private Key
-      #uses: garygrossgarten/github-action-ssh@release
-      #with:
-        #command: ls -a
-        #host: 10.3.17.67
-        #username: canvas
-        #passphrase: ${{ secrets.VM_PASSWORD }}
-      #env:
-       # CI: true
-   # - 
-     # name: Run SSH command
-     # uses: garygrossgarten/github-action-ssh@release
-      #with:
-       # command: sudo service CanvasRabitMQSender start
-        #host: 10.3.17.67
-        #username: canvas
-        #passphrase: ${{ secrets.VM_PASSWORD }}
+  # uses: Flaavius/ssh-commands@79ae027ae651731b483988ee69b2f628c75422f1
+      uses: Flaavius/ssh-commands@1.0
+      with:
+    # Command to run on the remote server
+        command: sh service.sh
+    # Hostname or IP address of the server.
+        host: 10.3.17.67
+     # Username for authentication.
+        username: canvas
+    # Password for password-based user authentication.
+        password: ${{ secrets.VM_PASSWORD }}
+
+    # Try keyboard-interactive user authentication if primary user authentication method fails.
+        tryKeyboard: true
