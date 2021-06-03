@@ -533,7 +533,7 @@ namespace CanvasRabbitMQSender
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                xmlSchema.Add("", Environment.CurrentDirectory + "/../../../" + xsd);
+                xmlSchema.Add("", "/app/" + xsd);
             }
 
             bool validationErrors = false;
