@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using MySql.Data.MySqlClient;
+using Npgsql;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -79,6 +80,7 @@ namespace CanvasRabbitMQSender.UserRepo
 
             foreach (var user in users)
             {
+                user.EntityVersion = GetEntityVersion(user.UUID);
                 string xml = XmlController.SerializeToXmlString<User>(user);
 
                 if (Program.XSDValidatie(xml, "user.xsd"))
@@ -125,5 +127,39 @@ namespace CanvasRabbitMQSender.UserRepo
             users.Clear();
             Console.ReadLine();
         }
+        public static int GetEntityVersion(string uuid)
+        {
+            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid; database=masteruuid;";
+            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid; database=masteruuid;";
+            string sqlen = "select EntityVersion from master where UUID = UUID_TO_BIN(@Uuid) and Source = @MyService ";
+            int entityversion = 1;
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(constring1))
+                {
+                    connection.Open();
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.Parameters.AddWithValue("Uuid", uuid);
+                        command.Parameters.AddWithValue("MyService", "CANVAS");
+                        command.CommandText = sqlen;
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                entityversion = reader.GetInt32(0) + 1;
+                            }
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception a)
+            {
+                Console.WriteLine(a.Message);
+            }
+            return entityversion;
+        }
     }
+    
 }

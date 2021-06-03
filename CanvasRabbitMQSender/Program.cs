@@ -461,35 +461,7 @@ namespace CanvasRabbitMQSender
 
         public static bool CheckUpdateEntityVersion(string uuid, int entityversion)
         {
-            string constring1 = "Server=10.3.17.63,3306; User ID = muuid; Password = muuid; database=masteruuid;";
-            string constring2 = "Server=10.3.17.64,3306; User ID = muuid; Password = muuid; database=masteruuid;";
-            string sqlen = "select EntityVersion from master where UUID = UUID_TO_BIN(@Uuid) and Source = @MyService ";
-            try
-            {
-                using (MySqlConnection connection = new MySqlConnection(constring1))
-                {
-                    connection.Open();
-                    using (MySqlCommand command = connection.CreateCommand())
-                    {
-                        command.Parameters.AddWithValue("Uuid", uuid);
-                        command.Parameters.AddWithValue("MyService", "CANVAS");
-                        command.CommandText = sqlen;
-                        using (MySqlDataReader reader = command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                entityversion = reader.GetInt32(0) + 1;
-                            }
-                        }
-                    }
-                    connection.Close();
-                }
-            }
-            catch (Exception a)
-            {
-                Console.WriteLine(a.Message);
-            }
-            string sql = "update master set EntityVersion = @Entityversion " +
+                string sql = "update master set EntityVersion = @Entityversion " +
                 "where Source = @MyService and " +
                 "EntityVersion = @Entityversion - 1 and " +
                 "UUID = UUID_TO_BIN(@Uuid) and " +
