@@ -507,8 +507,6 @@ namespace CanvasRabbitMQSender
         }
         public static bool XSDValidatie(string xml, string xsd)
         {
-
-            Console.WriteLine("i get here 6");
             XmlSchemaSet xmlSchema = new XmlSchemaSet();
             try
             {
@@ -521,8 +519,6 @@ namespace CanvasRabbitMQSender
             }
 
             bool validationErrors = false;
-            Console.WriteLine("i get here 7");
-
             XDocument doc = XDocument.Parse(xml);
 
             doc.Validate(xmlSchema, (sender, args) =>
@@ -530,8 +526,6 @@ namespace CanvasRabbitMQSender
                 Console.WriteLine("Error Message: " + args.Message);
                 validationErrors = true;
             });
-
-            Console.WriteLine("i get here" + (validationErrors.ToString()));
             return validationErrors;
         }
     }

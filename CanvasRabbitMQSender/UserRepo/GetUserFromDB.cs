@@ -76,24 +76,19 @@ namespace CanvasRabbitMQSender.UserRepo
             }
 
 
-            Console.WriteLine("i get here 1");
             foreach (var user in users)
             {
                 string xml = XmlController.SerializeToXmlString<User>(user);
 
-                Console.WriteLine("i get here 2");
                 if (Program.XSDValidatie(xml, "user.xsd"))
                 {
 
-                    Console.WriteLine("i get here 4");
                     continue;
                 }
 
-                Console.WriteLine("i get here 3");
                 if (user.CreatedAt == user.UpdatedAt || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
                 {
 
-                    Console.WriteLine("i get here 5");
                     Console.WriteLine(user.UUID);
                     //string xml = UserConvertToXml.convertToXml(user);
                     //string xml = Xmlcontroller.SerializeToXmlString(user);
