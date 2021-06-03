@@ -23,8 +23,8 @@ namespace CanvasRabbitMQReceiver
                                  exclusive: false,
                                  autoDelete: false,
                                  arguments: null);
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += (model, ea) =>
+            var consumerEvent = new EventingBasicConsumer(channel);
+            consumerEvent.Received += (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
@@ -37,11 +37,10 @@ namespace CanvasRabbitMQReceiver
                         {
                             if (CheckMUUID(canvasEvent.UUID) == false) { CreateEvent(canvasEvent); }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("create event " +canvasEvent.Title + " already exists");
+                            Console.WriteLine(ex);
                         }
-                        //catch { CreateEvent(canvasEvent); }
 
 
                         break;
@@ -50,12 +49,10 @@ namespace CanvasRabbitMQReceiver
                         {
                             if (CheckUpdateMUUID(canvasEvent.UUID, canvasEvent.Header.Source) == false) { UpdateEvent(canvasEvent); }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("update event " + canvasEvent.Title + " no such event or already updated");
+                            Console.WriteLine(ex);
                         }
-
-                        //catch { UpdateEvent(canvasEvent); }
 
                         break;
                     case "DELETE":
@@ -70,11 +67,11 @@ namespace CanvasRabbitMQReceiver
 
 
 
-                Console.WriteLine(" [x] Received Event " + canvasEvent.Header.Method);
+                Console.WriteLine(" [x] Received Event " + canvasEvent.Header.Method + " " + canvasEvent.Title);
             };
             channel.BasicConsume(queue: "to-canvas_event-queue",
                                  autoAck: true,
-                                 consumer: consumer);
+                                 consumer: consumerEvent);
 
             //User Consumer
             channel2.QueueDeclare(queue: "to-canvas_user-queue",
@@ -82,8 +79,8 @@ namespace CanvasRabbitMQReceiver
                                  exclusive: false,
                                  autoDelete: false,
                                  arguments: null);
-            var consumer2 = new EventingBasicConsumer(channel2);
-            consumer2.Received += (model, ea) =>
+            var consumerUser = new EventingBasicConsumer(channel2);
+            consumerUser.Received += (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
@@ -98,23 +95,21 @@ namespace CanvasRabbitMQReceiver
                         {
                             if (CheckMUUID(canvasUser.UUID) == false) { CreateUser(canvasUser); }
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            Console.WriteLine("create user " + canvasUser.Lastname + " " + canvasUser.Firstname + " already exists");
+                            Console.WriteLine(ex);
                         }
 
-                        //catch { CreateUser(canvasUser); }
                         break;
                     case "UPDATE":
                         if (CheckUpdateMUUID(canvasUser.UUID, canvasUser.Header.Source) == false) {
                             try
                             {
                                 UpdateUser(canvasUser);
-                                //if (CheckMUUID(canvasUser.UUID) == false) { UpdateUser(canvasUser); }
                             }
-                            catch
+                            catch (Exception ex)
                             {
-                                Console.WriteLine("update user " + canvasUser.Lastname + " " + canvasUser.Firstname + " not found or already up to date");
+                                Console.WriteLine(ex);
                             }
                         }
 
@@ -131,11 +126,70 @@ namespace CanvasRabbitMQReceiver
 
                 }
 
-                Console.WriteLine(" [x] Received User " + canvasUser.Header.Method);
+                Console.WriteLine(" [x] Received User " + canvasUser.Header.Method + " " + canvasUser.Lastname + " " + canvasUser.Firstname);
             };
             channel.BasicConsume(queue: "to-canvas_user-queue",
                                  autoAck: true,
-                                 consumer: consumer2);
+                                 consumer: consumerUser);
+            //User Consumer
+            channel2.QueueDeclare(queue: "to-canvas_attendance-queue",
+                                 durable: true,
+                                 exclusive: false,
+                                 autoDelete: false,
+                                 arguments: null);
+            var consumerAttendance = new EventingBasicConsumer(channel2);
+            consumerAttendance.Received += (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                Attendance canvasAttendance;
+
+                canvasAttendance = Xmlcontroller.DeserializeXmlString<Attendance>(message);
+                Console.WriteLine(message);
+                switch (canvasAttendance.Header.Method)
+                {
+                    case "CREATE":
+                        try
+                        {
+                            if (CheckMUUID(canvasUser.UUID) == false) { CreateUser(canvasUser); }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }
+
+                        break;
+                    case "UPDATE":
+                        if (CheckUpdateMUUID(canvasUser.UUID, canvasUser.Header.Source) == false)
+                        {
+                            try
+                            {
+                                UpdateUser(canvasUser);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex);
+                            }
+                        }
+
+
+
+                        break;
+                    case "DELETE":
+                        Console.WriteLine("delete failed");
+
+                        break;
+                    default:
+                        Console.WriteLine("header reading failed");
+                        break;
+
+                }
+
+                Console.WriteLine(" [x] Received Attendance " + canvasUser.Header.Method);
+            };
+            channel.BasicConsume(queue: "to-canvas_attendance-queue",
+                                 autoAck: true,
+                                 consumer: consumerAttendance);
 
 
 
@@ -163,7 +217,7 @@ namespace CanvasRabbitMQReceiver
 
             int courseNumber = 5;
             int rootAccId = 2;
-            var userId = 1;
+            int userId = 1;
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             {
                 NpgsqlCommand fetchId = new NpgsqlCommand(sqlFetchId, connection);
@@ -180,7 +234,7 @@ namespace CanvasRabbitMQReceiver
                     while (reader.Read())
                     {
                         int id = reader.GetOrdinal("id");
-                        userId = reader.GetInt32(id);
+                        
                     }
 
                 }
@@ -269,13 +323,13 @@ namespace CanvasRabbitMQReceiver
                 var uuid = command.Parameters.Add("@uuid", NpgsqlTypes.NpgsqlDbType.Text);
 
                 connection.Open();
-                /*name.Value = canvasUser.Firstname + ", " + canvasUser.Lastname;
+                name.Value = canvasUser.Firstname + ", " + canvasUser.Lastname;
                 sortable_name.Value = canvasUser.Sortable_name;
                 workflow_state.Value = "registered";
                 created_at.Value = canvasUser.CreatedAt;
                 updated_at.Value = canvasUser.UpdatedAt;
                 short_name.Value = canvasUser.Firstname + " " + canvasUser.Lastname;
-                uuid.Value = canvasUser.UUID;*/
+                uuid.Value = canvasUser.UUID;
 
                 command.Prepare();
 
@@ -363,71 +417,6 @@ namespace CanvasRabbitMQReceiver
             static void DeleteUser(User canvasUser) { }
 
 
-
-
-
-
-            /*static void Stuff()
-            {
-                String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
-                String sql = "SELECT context_id,start_at,end_at,context_type,title,location_name,location_address,workflow_state FROM public.calendar_events ";
-                String sql2 = "INSERT INTO public.calendar_events(id,user_id,context_code,context_id,start_at,end_at,context_type,title,location_name,location_address,workflow_state,created_at,updated_at,root_account_id) VALUES " +
-                    "(nextval ('calendar_events_id_seq'::regclass),@user_id,@context_code,@context_id,@start_at,@end_at,@context_type,@title,@location_name,@location_address,@workflow_state,@created_at,@updated_at,@root_account_id)";
-                using (NpgsqlConnection connection = new NpgsqlConnection(constring))
-                {
-                    /*NpgsqlCommand command = new NpgsqlCommand(
-                    sql, connection);
-                    connection.Open();
-                    using (NpgsqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Console.WriteLine(String.Format("{0}, {1},{2},{3},{4},{5},{6},{7},{8}",
-                                reader[0], reader[1],reader[2], reader[3], reader[4], reader[5], reader[6], reader[7], reader[8]));
-                        }
-                        Console.WriteLine(DateTime.Now.AddDays(1));
-                    }*/
-
-
-            /*NpgsqlCommand command = new NpgsqlCommand(sql2, connection);
-            var context_id = command.Parameters.Add("@context_id",NpgsqlTypes.NpgsqlDbType.Bigint);
-            var context_type = command.Parameters.Add("@context_type",NpgsqlTypes.NpgsqlDbType.Text);
-            var title = command.Parameters.Add("@title", NpgsqlTypes.NpgsqlDbType.Text);
-            var location_name = command.Parameters.Add("@location_name", NpgsqlTypes.NpgsqlDbType.Text);
-            var location_address = command.Parameters.Add("@location_address", NpgsqlTypes.NpgsqlDbType.Text);
-            var start_at = command.Parameters.Add("@start_at",NpgsqlTypes.NpgsqlDbType.Date);
-            var end_at = command.Parameters.Add("@end_at", NpgsqlTypes.NpgsqlDbType.Date);
-            var workflow_state = command.Parameters.Add("@workflow_state",NpgsqlTypes.NpgsqlDbType.Text);
-            var user_id = command.Parameters.Add("@user_id", NpgsqlTypes.NpgsqlDbType.Bigint);
-            var created_at = command.Parameters.Add("@created_at", NpgsqlTypes.NpgsqlDbType.Date);
-            var updated_at = command.Parameters.Add("@updated_at", NpgsqlTypes.NpgsqlDbType.Date);
-            var context_code = command.Parameters.Add("@context_code", NpgsqlTypes.NpgsqlDbType.Text);
-            var root_account_id = command.Parameters.Add("@root_account_id", NpgsqlTypes.NpgsqlDbType.Bigint);
-
-
-            connection.Open();
-            command.Prepare();
-            context_id.Value = 2 ;
-            context_type.Value = "Course";
-            title.Value = "JOSKEdd";
-            location_name.Value = "My house";
-            location_address.Value = "You know this";
-            workflow_state.Value = "active";
-            start_at.Value = DateTime.Now.AddDays(1);
-            end_at.Value = DateTime.Now.AddDays(1).AddHours(2);
-            user_id.Value = 2;
-            created_at.Value = DateTime.Now;
-            updated_at.Value = DateTime.Now.AddSeconds(-5);
-            context_code.Value = "course_2";
-            root_account_id.Value = 2;
-            command.ExecuteNonQuery();
-            connection.Close();
-
-
-        }
-
-    }*/
-
             public static Boolean CheckMUUID(String uuid) {
                 string constring1 = "Server=10.3.17.63,3306;Database=masteruuid;User ID = muuid; Password = muuid;";
                 string constring2 = "Server=10.3.17.64,3306;Database=masteruuid;User ID = muuid; Password = muuid;";
@@ -492,62 +481,62 @@ namespace CanvasRabbitMQReceiver
                 return uuidFound;
             }
 
-            static void InsertMUUID(String type, string uuid) {
+            public static void InsertMUUID(String type, string uuid,int sourceId) {
                 string constring1 = "Server=10.3.17.63,3306;Database=masteruuid;User ID = muuid; Password = muuid;";
                 string constring2 = "Server=10.3.17.64,3306;Database=masteruuid;User ID = muuid; Password = muuid;";
-                string sql = "INSERT INTO master (UUID,Source_EntityId,EntityType,Source " +
-                    "VALUES(UUID_TO_BIN(@uuid),@source_entityid,@entitytype,@source); ";
+                string sql = "INSERT INTO master(UUID, Source_EntityId, EntityType, Source )VALUES(UUID_TO_BIN(@Uuid), @Id, @Type, @Source); ";
 
                 String source = "CANVAS";
-                int source_id = 3;
 
-                try
+
+            try
+            {
+                using (MySqlConnection connection = new MySqlConnection(constring1))
                 {
-                    using (MySqlConnection connection = new MySqlConnection(constring1))
+                    connection.Open();
+                    using (MySqlCommand command = connection.CreateCommand())
                     {
-                        MySqlCommand command = new MySqlCommand(sql, connection);
-                        connection.Open();
-                        //command.Prepare();
-                        command.Parameters.AddWithValue("@uuid", uuid);
-                        command.Parameters.AddWithValue("@source_entityid", source_id);
-                        command.Parameters.AddWithValue("@entitytype", type);
-                        command.Parameters.AddWithValue("@source", source);
-                        command.Prepare();
+                        command.CommandText = sql;
+                        command.Parameters.AddWithValue("@Uuid", uuid);
+                        command.Parameters.AddWithValue("@Type", type);
+                        command.Parameters.AddWithValue("@Id", sourceId);
+                        command.Parameters.AddWithValue("@Source", source);
 
                         command.ExecuteNonQuery();
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception a)
+            {
+                Console.WriteLine("Failed to connect to first server for muuid");
+                Console.WriteLine(a.ToString());
+                try
+                {
+                    using (MySqlConnection connection = new MySqlConnection(constring2))
+                    {
+                        connection.Open();
+                        using (MySqlCommand command = connection.CreateCommand())
+                        {
+                            command.CommandText = sql;
+                            command.Parameters.AddWithValue("@Uuid", uuid);
+                            command.Parameters.AddWithValue("@Type", type);
+                            command.Parameters.AddWithValue("@Id", sourceId);
+                            command.Parameters.AddWithValue("@Source", source);
+
+                            command.ExecuteNonQuery();
+                        }
                         connection.Close();
                     }
                 }
-                catch (Exception a)
+                catch (Exception b)
                 {
-                    Console.WriteLine("Failed to connect to first server for muuid");
-                    Console.WriteLine(a.ToString());
-                    try
-                    {
-                        using (MySqlConnection connection = new MySqlConnection(constring2))
-                        {
-                            MySqlCommand command = new MySqlCommand(sql, connection);
-                            connection.Open();
-                            //command.Prepare();
-                            command.Parameters.AddWithValue("@uuid", uuid);
-                            command.Parameters.AddWithValue("@source_entityid", source_id);
-                            command.Parameters.AddWithValue("@entitytype", type);
-                            command.Parameters.AddWithValue("@source", source);
-                            command.Prepare();
-
-                            command.ExecuteNonQuery();
-                            connection.Close();
-                            connection.Close();
-                        }
-                    }
-                    catch (Exception b)
-                    {
-                        Console.WriteLine("Failed to connect to second server for muuid");
-                        Console.WriteLine(b.ToString());
-                        throw;
-                    }
+                    Console.WriteLine("Failed to connect to second server for muuid");
+                    Console.WriteLine(b.ToString());
                     throw;
                 }
+                throw;
+            }
 
             }
 
@@ -627,6 +616,8 @@ namespace CanvasRabbitMQReceiver
                     throw;
                 }
             }
+
+        public static void DeleteMUUID() { }
 
         }
     } 
