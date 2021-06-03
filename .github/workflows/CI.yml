@@ -66,16 +66,12 @@ jobs:
         username: ftpuser
         password: ubuntu123
         port: 21
-  start:
-     runs-on: ubuntu-20.04
-     needs: build
-     steps:
-      - 
-       name: SSH Remote Commands
+    - 
+      name: SSH Remote Commands
   # You may pin to the exact commit or the version.
   # uses: appleboy/ssh-action@1d1b21ca96111b1eb4c03c21c14ebb971d2200f6
-       uses: appleboy/ssh-action@v0.1.4
-       with:
+      uses: appleboy/ssh-action@v0.1.4
+      with:
     # ssh host
         host: 10.3.17.67
     # ssh username
