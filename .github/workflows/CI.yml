@@ -1,4 +1,7 @@
 name: CI Pipeline Canvas
+concurrency: 
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
 on:
   push:
     branches: [ main ]
@@ -7,9 +10,7 @@ on:
 
 
 jobs:
-    concurrency: 
-      group: ${{ github.head_ref }}
-      cancel-in-progress: true
+    
     build:
 
     runs-on: ubuntu-20.04
