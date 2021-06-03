@@ -29,10 +29,7 @@ namespace CanvasRabbitMQReceiver.UserRepo
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionString: constring))
             {
                 connection.Open();
-                string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
-                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at FROM public.users where updated_at > now() - interval '5 second'";
-                Console.WriteLine(nowMinus5);
-
+                var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at, muuid, workflow_state FROM public.users where updated_at > now() - interval '5 second' and id != 1";
                 User user;
                 using var cmd = new NpgsqlCommand(sqlcmd, connection);
                 NpgsqlDataReader dr = cmd.ExecuteReader();
@@ -42,61 +39,78 @@ namespace CanvasRabbitMQReceiver.UserRepo
                     user = new User(
                                 dr.GetInt32(0),
                                 dr.GetString(dr.GetOrdinal("sortable_name")),
-                                dr.GetString(1) + "@ipwt3.onmicrosoft.com",
                                 "lecturer",
                                 dr.GetDateTime(4).AddHours(2),
                                 Convert.ToDateTime(dr["updated_at"]).AddHours(2),
                                 false);
 
 
-
-                     //string mmud = dr.GetString(dr.GetOrdinal("muuid"));
-
-                    /* if (!dr.IsDBNull(dr.GetOrdinal("muuid")))
-                     {
-                         user.UUID = dr["muuid"].ToString();
-                     }
-                     else
-                     {
-                         user.UUID = Uuid.MakeUserUUID(dr.GetInt32(0));
-                     } */
-
-
-
-                    user.UUID = Uuid.GetUUID();
-                    //Console.WriteLine("*********************MUUID IS: " + mmud +"*************************");
+                      
+                    //Update
+                      if (!dr.IsDBNull(dr.GetOrdinal("muuid")))
+                      {
+                        user.UUID = dr.GetString(dr.GetOrdinal("muuid"));
+                      }
+                      else
+                      {
+                         user.UUID = Program.MakeUserUUID(dr.GetInt32(0));
+                      }
+                    if (dr.GetString(dr.GetOrdinal("workflow_state")) == "deleted") {
+                        user.Header.Method = "DELETE";
+                    } 
+                    else { 
+                        if (user.CreatedAt.CompareTo(user.UpdatedAt) < 10 )
+                        {
+                            user.Header.Method = "CREATE";
+                        }
+                        else
+                        {
+                            user.Header.Method = "UPDATE";
+                        }
+                    }
+                    //user.UUID = Uuid.GetUUID();
                     users.Add(user);
-                    Console.WriteLine(user.UUID);
                 }
 
                 connection.Close();
             }
 
 
-
             foreach (var user in users)
             {
-                string xml = UserConvertToXml.convertToXml(user);
-                //string xml = Xmlcontroller.SerializeToXmlString(user);
-                var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
-                factory.UserName = "guest";
-                factory.Password = "guest";
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel())
+                string xml = XmlController.SerializeToXmlString<User>(user);
+
+                if (Program.XSDValidatie(xml, "user.xsd"))
                 {
-                    var body = Encoding.UTF8.GetBytes(xml);
+
+                    continue;
+                }
+
+                if (user.CreatedAt == user.UpdatedAt || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
+                {
+
+                    Console.WriteLine(user.UUID);
+                    //string xml = UserConvertToXml.convertToXml(user);
+                    //string xml = Xmlcontroller.SerializeToXmlString(user);
+                    var factory = new ConnectionFactory() { HostName = "10.3.17.61" };
+                    factory.UserName = "guest";
+                    factory.Password = "guest";
+                    using (var connection = factory.CreateConnection()) {
+                        using (var channel = connection.CreateModel())
+                        {
+                            var body = Encoding.UTF8.GetBytes(xml);
 
 
-                    channel.BasicPublish(exchange: "user-exchange",
-                                         routingKey: "to-canvas_user-queue",
-                                         basicProperties: null,
-                                         body: body);
-                    Console.WriteLine(" [x] Sent {0}", xml);
+                            channel.BasicPublish(exchange: "user-exchange",
+                                                 routingKey: "to-canvas_user-queue",
+                                                 basicProperties: null,
+                                                 body: body);
+                            Console.WriteLine(" [x] Sent {0}", xml);
+                        }
+                    }
                 }
             }
             users.Clear();
-            Console.WriteLine("Complete");
-
             Console.ReadLine();
         }
     }

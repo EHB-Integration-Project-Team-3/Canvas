@@ -1,0 +1,89 @@
+name: CI Pipeline Canvas
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+    
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - 
+      name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+    - 
+      name: Install dependencies
+      run: dotnet restore
+    - 
+      name: Build
+      run: dotnet build --no-restore
+    - 
+      name: Test
+      run: dotnet test
+      
+    - 
+      name: publish
+      working-directory: CanvasRabbitMQSender
+      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+    - 
+      name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v2
+      with:
+        name: .net-app
+        path: ${{env.DOTNET_ROOT}}/myapp
+  deploy:
+    concurrency: 
+      group: canvas
+      cancel-in-progress: true
+    runs-on: windows-latest
+    needs: build
+    steps:
+    - 
+      name: Download artifact from build job
+      uses: actions/download-artifact@v2
+      with:
+        name: .net-app
+    -
+      name: Create VPN connection
+      shell: pwsh
+      env:
+        USER: ${{ secrets.EHB_USER}}
+        SECRET: ${{ secrets.EHB_PASSWORD}}
+      run: | 
+       Add-VpnConnection -Name "EHB_VPN" -ServerAddress "dtsslvpn.ehb.be" -TunnelType "SSTP" -AllUserConnection -Force
+       rasdial "EHB_VPN" "$env:USER" "$env:SECRET"
+
+       
+    - name: FTP Deploy
+        #You may pin to the exact commit or the version.
+        #uses: SamKirkland/FTP-Deploy-Action@2a4e9b1312ebeb73a1f72b9330c71831c1e4ce01
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with: 
+        server: 10.3.17.67
+        username: ftpuser
+        password: ubuntu123
+        port: 21
+    - 
+      name: Run Commands via SSH
+  # You may pin to the exact commit or the version.
+  # uses: Flaavius/ssh-commands@79ae027ae651731b483988ee69b2f628c75422f1
+      uses: Flaavius/ssh-commands@1.0
+      with:
+    # Command to run on the remote server
+        command: sh service.sh
+    # Hostname or IP address of the server.
+        host: 10.3.17.67
+     # Username for authentication.
+        username: canvas
+    # Password for password-based user authentication.
+        password: ${{ secrets.VM_PASSWORD }}
+
+    # Try keyboard-interactive user authentication if primary user authentication method fails.
+        tryKeyboard: true

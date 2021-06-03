@@ -5,7 +5,8 @@ using System.Xml.Serialization;
 
 namespace CanvasRabbitMQReceiver
 {
-    class Heartbeat
+    [XmlRoot(ElementName = "heartbeat")]
+    public class Heartbeat
     {
         public Heartbeat()
         {
@@ -34,4 +35,3 @@ namespace CanvasRabbitMQReceiver
         public string Source { get; set; }
     }
 }
-
