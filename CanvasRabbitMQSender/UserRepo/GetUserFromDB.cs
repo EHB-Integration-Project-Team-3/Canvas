@@ -26,14 +26,10 @@ namespace CanvasRabbitMQSender.UserRepo
 
         public static void GetAndPushUser(Object source, ElapsedEventArgs e)
         {
-            DateTime now1 = DateTime.Now;
             using (NpgsqlConnection connection = new NpgsqlConnection(connectionString: constring))
             {
                 connection.Open();
-                string nowMinus5 = DateTime.Now.Subtract(TimeSpan.FromSeconds(5)).ToString("yyyy-MM-dd HH:mm:ss");
                 var sqlcmd = "SELECT id, name, sortable_name, uuid, created_at, updated_at, muuid, workflow_state FROM public.users where updated_at > now() - interval '5 second' and id != 1";
-                Console.WriteLine(nowMinus5);
-
                 User user;
                 using var cmd = new NpgsqlCommand(sqlcmd, connection);
                 NpgsqlDataReader dr = cmd.ExecuteReader();
@@ -72,9 +68,6 @@ namespace CanvasRabbitMQSender.UserRepo
                             user.Header.Method = "UPDATE";
                         }
                     }
-
-                    
-                    user.Header.Method = "CREATE";
                     //user.UUID = Uuid.GetUUID();
                     users.Add(user);
                 }
@@ -83,17 +76,24 @@ namespace CanvasRabbitMQSender.UserRepo
             }
 
 
-
+            Console.WriteLine("i get here 1");
             foreach (var user in users)
             {
                 string xml = XmlController.SerializeToXmlString<User>(user);
 
+                Console.WriteLine("i get here 2");
                 if (Program.XSDValidatie(xml, "user.xsd"))
                 {
+
+                    Console.WriteLine("i get here 4");
                     continue;
                 }
+
+                Console.WriteLine("i get here 3");
                 if (user.CreatedAt == user.UpdatedAt || Program.CheckUpdateEntityVersion(user.UUID, user.EntityVersion))
                 {
+
+                    Console.WriteLine("i get here 5");
                     Console.WriteLine(user.UUID);
                     //string xml = UserConvertToXml.convertToXml(user);
                     //string xml = Xmlcontroller.SerializeToXmlString(user);
