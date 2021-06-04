@@ -559,8 +559,8 @@ namespace CanvasRabbitMQReceiver
         static void CreateAttendence(attendance attendance)
         {
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
-            String sqlCreate = "INSERT INTO enrollments(id,user_id,course_id,(select type from enrollments where userid=@userid limit 1),uuid,workflow_state,created_at,updated_at,course_section_id,root_account_id,(select role_id from enrollments where userid=@userid limit 1)) VALUES " +
-    "(nextval ('users_id_seq'::regclass),(select id from users where uuid=@useruuid),(select id from courses where name='Events'),@uuid,@workflow_state,@created_at,@updated_at,(select id from course_sections where name=(select title from calendar_events where uuid=@eventuuid)),@root_account_id)";
+            String sqlCreate = "INSERT INTO enrollments(id,user_id,course_id,type,uuid,workflow_state,created_at,updated_at,course_section_id,root_account_id,role_id) VALUES " +
+    "(nextval ('users_id_seq'::regclass),(select id from users where uuid=@useruuid),(select id from courses where name='Events'),(select type from enrollments where user_id=@userid limit 1),@uuid,@workflow_state,@created_at,@updated_at,(select id from course_sections where name=(select title from calendar_events where uuid=@eventuuid)),@root_account_id,(select role_id from enrollments where user_id=@userid limit 1))";
 
             
 
