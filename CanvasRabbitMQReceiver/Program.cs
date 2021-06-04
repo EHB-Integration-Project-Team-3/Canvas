@@ -100,8 +100,9 @@ namespace CanvasRabbitMQReceiver
                     case userHeaderMethod.CREATE:
                         try
                         {
-                           
+
                             if (CheckMUUID(canvasUser.uuid) == false) { CreateUser(canvasUser); }
+                            else { createUserOnlyEnrollment(canvasUser); }
                         }
                         catch (Exception ex)
                         {
@@ -250,8 +251,8 @@ namespace CanvasRabbitMQReceiver
                     command.Parameters.AddWithValue("@location_name", canvasEvent.location);
                     command.Parameters.AddWithValue("@location_address", canvasEvent.location);
                     command.Parameters.AddWithValue("@workflow_state", "active");
-                    command.Parameters.AddWithValue("@created_at", DateTime.Now);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                     command.Parameters.AddWithValue("@root_account_id", rootAccId);
                     command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
 
@@ -270,8 +271,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@context_id", courseNumber);
                         command.Parameters.AddWithValue("@root_account_id", rootAccId);
                         command.Parameters.AddWithValue("@name", canvasEvent.title);
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                         command.Parameters.AddWithValue("@workflow_state", "active");
 
                         command.CommandText = sqlSection;
@@ -310,7 +311,7 @@ namespace CanvasRabbitMQReceiver
                     command.Parameters.AddWithValue("@title", canvasEvent.title);
                     command.Parameters.AddWithValue("@location_name", canvasEvent.location);
                     command.Parameters.AddWithValue("@location_address", canvasEvent.location);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                     command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
                     command.CommandText = sqlEvent;
                     connection.Open();
@@ -325,7 +326,7 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connectionSection.CreateCommand())
                 {
                     command.Parameters.AddWithValue("@name", canvasEvent.title);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                     command.Parameters.AddWithValue("@oldname", localName);
                     command.CommandText = sqlSection;
                     connectionSection.Open();
@@ -349,8 +350,8 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connection.CreateCommand())
                 {
                    
-                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                     command.Parameters.AddWithValue("@workflow_state", "deleted");
                     command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
 
@@ -366,8 +367,8 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connectionSection.CreateCommand())
                 {
 
-                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                     command.Parameters.AddWithValue("@workflow_state", "deleted");
                     command.Parameters.AddWithValue("@name", canvasEvent.title);
                     command.CommandText = sqlSection;
@@ -406,8 +407,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
                         command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
                         command.Parameters.AddWithValue("@workflow_state", "registered");
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                         command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
                         command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
 
@@ -431,8 +432,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@type", roleTitle);
                         command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
                         command.Parameters.AddWithValue("@workflow_state", "active");
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                         command.Parameters.AddWithValue("@eventuuid", "Events-Desiderius");
                         command.Parameters.AddWithValue("@root_account_id", 2);
                         command.Parameters.AddWithValue("@role_id", roleId);
@@ -455,6 +456,48 @@ namespace CanvasRabbitMQReceiver
             InsertMUUID("USER", canvasUser.uuid, localId);
 
         }
+
+        static void createUserOnlyEnrollment(@user canvasUser) {
+            String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
+            
+            String sqlEnroll = "INSERT INTO enrollments(id,user_id,course_id,type,uuid,workflow_state,created_at,updated_at,course_section_id,root_account_id,role_id) VALUES " +
+    "(nextval ('users_id_seq'::regclass),(select id from users where uuid=@useruuid),(select id from courses where name='Events'),@type,@uuid,@workflow_state,@created_at,@updated_at," +
+    "(select id from course_sections where name=@eventuuid),@root_account_id,@role_id)";
+
+
+            String roleTitle = "student";
+            int roleId = 19;
+
+            try
+            {
+                using (NpgsqlConnection connectionSection = new NpgsqlConnection(constring))
+                {
+                    try { } catch (Exception ex) { Console.WriteLine(ex); }
+                    using (NpgsqlCommand command = connectionSection.CreateCommand())
+                    {
+
+                        command.Parameters.AddWithValue("@useruuid", canvasUser.uuid);
+                        command.Parameters.AddWithValue("@type", roleTitle);
+                        command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
+                        command.Parameters.AddWithValue("@workflow_state", "active");
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@eventuuid", "Events-Desiderius");
+                        command.Parameters.AddWithValue("@root_account_id", 2);
+                        command.Parameters.AddWithValue("@role_id", roleId);
+
+
+
+                        command.CommandText = sqlEnroll;
+                        connectionSection.Open();
+                        //command.ExecuteNonQuery();
+                        using (NpgsqlDataReader reader = command.ExecuteReader()) { while (reader.Read()) { Console.WriteLine(reader.GetInt32(0)); } }
+                        connectionSection.Close();
+                    }
+                }
+            }
+            catch (Exception ex) { Console.WriteLine(ex); }
+        }
         static void UpdateUser(user canvasUser)
             {
                 String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
@@ -474,7 +517,7 @@ namespace CanvasRabbitMQReceiver
 
                     command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
                     command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                     command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
                     command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
 
@@ -498,7 +541,7 @@ namespace CanvasRabbitMQReceiver
                     using (NpgsqlCommand command = connection.CreateCommand())
                     {
 
-                        command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10));
                         command.Parameters.AddWithValue("@workflow_state", "deleted");
                         command.Parameters.AddWithValue("@updated_at", DateTime.Now);
                         command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
@@ -531,8 +574,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@useruuid", attendance.attendeeId);
                         command.Parameters.AddWithValue("@uuid", attendance.uuid);
                         command.Parameters.AddWithValue("@workflow_state", "active");
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
                         command.Parameters.AddWithValue("@eventuuid", attendance.eventId);
                         command.Parameters.AddWithValue("@root_account_id", 2);
 
