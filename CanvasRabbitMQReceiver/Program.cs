@@ -100,6 +100,7 @@ namespace CanvasRabbitMQReceiver
                     case userHeaderMethod.CREATE:
                         try
                         {
+                           
                             if (CheckMUUID(canvasUser.uuid) == false) { CreateUser(canvasUser); }
                         }
                         catch (Exception ex)
@@ -167,8 +168,10 @@ namespace CanvasRabbitMQReceiver
                     case attendanceHeaderMethod.CREATE:
                         try
                         {
-                            
-                        }
+                            if (CheckMUUID(canvasAttendance.uuid) == false)
+                            {
+                                CreateAttendence(canvasAttendance);
+                            }   }
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex);
@@ -225,7 +228,7 @@ namespace CanvasRabbitMQReceiver
             String sqlEvent = "INSERT INTO public.calendar_events(id,user_id,context_code,context_id,start_at,end_at,context_type,title,location_name,location_address,workflow_state,created_at,updated_at,root_account_id,uuid) VALUES " +
                 "(nextval ('calendar_events_id_seq'::regclass),@user_id,@context_code,@context_id,@start_at,@end_at,@context_type,@title,@location_name,@location_address,@workflow_state,@created_at,@updated_at,@root_account_id,@uuid)";
             String sqlSection = "INSERT INTO public.course_sections(id,course_id,root_account_id,name,created_at,updated_at,workflow_state) VALUES " +
-                "(nextval ('course_sections_id_seq'::regclass),@course_id,@root_account_id,@name,@created_at,@updated_at,@workflow_state)";
+                "(nextval ('course_sections_id_seq'::regclass),(select id from courses where name = 'Events'),@root_account_id,@name,@created_at,@updated_at,@workflow_state)";
 
             int courseNumber = 5;
             int rootAccId = 2;
@@ -289,9 +292,9 @@ namespace CanvasRabbitMQReceiver
         {
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
             String sqlEvent = "UPDATE public.calendar_events SET user_id=@user_id,start_at=@start_at,end_at=@end_at,title=@title,location_name=@location_name,location_address=@location_address,updated_at=@updated_at,entityversion=entityversion+1" +
-                "WHERE uuid=@uuid";
-            String sqlSection = "UPDATE course_sections SET updated_at=@updated_at,name=@name" +
-                "WHERE name=@oldname";
+                            "WHERE uuid=@uuid";
+            String sqlSection = "UPDATE course_sections SET updated_at=@updated_at,name=@name WHERE name=@oldname";
+            
 
             int localId = FetchLocalId(canvasEvent.uuid,0);
             String localName = FetchLocalName(canvasEvent.uuid);
@@ -336,8 +339,7 @@ namespace CanvasRabbitMQReceiver
             static void DeleteEvent(@event canvasEvent) {
 
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
-            String sqlEvent = "UPDATE public.calendar_events SET deleted_at=@deleted_at,updated_at,@updated_at,workflow_state=@workflow_state" +
-                "WHERE uuid=@uuid";
+            String sqlEvent = "UPDATE public.calendar_events SET deleted_at=@deleted_at,updated_at=@updated_at,workflow_state=@workflow_state WHERE uuid=@uuid";
             String sqlSection = "UPDATE public.course_sections SET updated_at=@updated_at,workflow_state=@workflow_state WHERE name=@name";
             int localId = FetchLocalId(canvasEvent.uuid,0);
 
@@ -374,34 +376,80 @@ namespace CanvasRabbitMQReceiver
                     connectionSection.Close();
                 }
             }
+            DeleteMUUID(canvasEvent.uuid);
         }
 
             static void CreateUser(@user canvasUser) {
                 String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
-                String sqlCreate = "INSERT INTO public.users(id,name,sortable_name,workflow_state,muuid,created_at,updated_at,short_name,muuid) VALUES " +
-        "(nextval ('users_id_seq'::regclass),@name,@sortable_name,@workflow_state,@uuid,@created_at,@updated_at,@short_name,@muuid)";
+                String sqlCreate = "INSERT INTO public.users(id,name,sortable_name,workflow_state,uuid,created_at,updated_at,short_name) VALUES " +
+        "(nextval ('users_id_seq'::regclass),@name,@sortable_name,@workflow_state,@uuid,@created_at,@updated_at,@short_name)";
+            
+            String sqlEnroll = "INSERT INTO enrollments(id,user_id,course_id,type,uuid,workflow_state,created_at,updated_at,course_section_id,root_account_id,role_id) VALUES " +
+    "(nextval ('users_id_seq'::regclass),(select id from users where uuid=@useruuid),(select id from courses where name='Events'),@type,@uuid,@workflow_state,@created_at,@updated_at," +
+    "(select id from course_sections where name=@eventuuid),@root_account_id,@role_id)";
 
 
-            using (NpgsqlConnection connectionSection = new NpgsqlConnection(constring))
+            String roleTitle = "student";
+            int roleId = 19;
+
+            if (roleTitle.Equals("student")) { roleTitle = "StudentEnrollment";}
+            else { roleTitle = "TeacherEnrollment"; roleId = 20; }
+
+            try
             {
-
-                using (NpgsqlCommand command = connectionSection.CreateCommand())
+                using (NpgsqlConnection connectionSection = new NpgsqlConnection(constring))
                 {
 
-                    command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
-                    command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
-                    command.Parameters.AddWithValue("@workflow_state", "registered");
-                    command.Parameters.AddWithValue("@created_at", DateTime.Now);
-                    command.Parameters.AddWithValue("@updated_at",DateTime.Now);
-                    command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
-                    command.Parameters.AddWithValue("@muuid", canvasUser.uuid);
+                    using (NpgsqlCommand command = connectionSection.CreateCommand())
+                    {
 
-                    command.CommandText = sqlCreate;
-                    connectionSection.Open();
-                    command.ExecuteNonQuery();
-                    connectionSection.Close();
+                        command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
+                        command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
+                        command.Parameters.AddWithValue("@workflow_state", "registered");
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
+                        command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
+
+                        command.CommandText = sqlCreate;
+                        connectionSection.Open();
+                        command.ExecuteNonQuery();
+                        connectionSection.Close();
+                    }
                 }
             }
+            catch (Exception ex) { Console.WriteLine(ex); }
+            try
+            {
+                using (NpgsqlConnection connectionSection = new NpgsqlConnection(constring))
+                {
+                    try { }catch(Exception ex) { Console.WriteLine(ex); }
+                    using (NpgsqlCommand command = connectionSection.CreateCommand())
+                    {
+
+                        command.Parameters.AddWithValue("@useruuid", canvasUser.uuid);
+                        command.Parameters.AddWithValue("@type", roleTitle);
+                        command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
+                        command.Parameters.AddWithValue("@workflow_state", "active");
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@eventuuid", "Events-Desiderius");
+                        command.Parameters.AddWithValue("@root_account_id", 2);
+                        command.Parameters.AddWithValue("@role_id", roleId);
+
+
+
+                        command.CommandText = sqlEnroll;
+                        connectionSection.Open();
+                        //command.ExecuteNonQuery();
+                        using (NpgsqlDataReader reader = command.ExecuteReader()) { while (reader.Read()) { Console.WriteLine(reader.GetInt32(0)); } }
+                        connectionSection.Close();
+                    }
+                }
+            }
+            catch (Exception ex) { Console.WriteLine(ex); }
+
+
             int localId = FetchLocalId(canvasUser.uuid, 1);
 
             InsertMUUID("USER", canvasUser.uuid, localId);
@@ -410,8 +458,13 @@ namespace CanvasRabbitMQReceiver
         static void UpdateUser(user canvasUser)
             {
                 String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
-                String sqlUpdate = "UPDATE public.users SET name=@name,sortable_name=@sortable_name,workflow_state=@workflow_state,created_at=@created_at,updated_at=@updated_at,short_name=@short_name" +
-                    "WHERE muuid=@uuid";
+                String sqlUpdate = "UPDATE public.users SET " +
+                "name=@name," +
+                "sortable_name=@sortable_name," +
+                "updated_at=@updated_at," +
+                "short_name=@short_name," +
+                "entityversion=entityversion+1 " +
+                "WHERE uuid=@uuid";
 
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             {
@@ -432,30 +485,72 @@ namespace CanvasRabbitMQReceiver
                 }
             }
         }
-            static void DeleteUser(@user canvasUser) {
+        static void DeleteUser(@user canvasUser) {
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
 
-            String sqlDelete = "UPDATE public.users SET deleted_at=@deleted_at,updated_at,@updated_at,workflow_state=@workflow_state" +
-        "WHERE muuid=@uuid";
+            String sqlDelete = "UPDATE public.users SET deleted_at=@deleted_at,updated_at=@updated_at,workflow_state=@workflow_state" +
+        " WHERE uuid=@uuid";
 
             using (NpgsqlConnection connection = new NpgsqlConnection(constring))
             {
-
-                using (NpgsqlCommand command = connection.CreateCommand())
+                try
                 {
+                    using (NpgsqlCommand command = connection.CreateCommand())
+                    {
 
-                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
-                    command.Parameters.AddWithValue("@workflow_state", "deleted");
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now);
-                    command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
-                    command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
+                        command.Parameters.AddWithValue("@deleted_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@workflow_state", "deleted");
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
 
-                    command.CommandText = sqlDelete;
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                    connection.Close();
+                        command.CommandText = sqlDelete;
+                        connection.Open();
+                        command.ExecuteNonQuery();
+                        connection.Close();
+                    }
                 }
+                catch (Exception ex) { Console.WriteLine(ex); }
+
             }
+        }
+        static void CreateAttendence(attendance attendance)
+        {
+            String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
+            String sqlCreate = "INSERT INTO enrollments(id,user_id,course_id,(select type from enrollments where userid=@userid limit 1),uuid,workflow_state,created_at,updated_at,course_section_id,root_account_id,(select role_id from enrollments where userid=@userid limit 1)) VALUES " +
+    "(nextval ('users_id_seq'::regclass),(select id from users where uuid=@useruuid),(select id from courses where name='Events'),@uuid,@workflow_state,@created_at,@updated_at,(select id from course_sections where name=(select title from calendar_events where uuid=@eventuuid)),@root_account_id)";
+
+            
+
+            using (NpgsqlConnection connectionSection = new NpgsqlConnection(constring))
+            {
+                try
+                {
+                    using (NpgsqlCommand command = connectionSection.CreateCommand())
+                    {
+
+                        command.Parameters.AddWithValue("@useruuid", attendance.attendeeId);
+                        command.Parameters.AddWithValue("@uuid", attendance.uuid);
+                        command.Parameters.AddWithValue("@workflow_state", "active");
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now);
+                        command.Parameters.AddWithValue("@eventuuid", attendance.eventId);
+                        command.Parameters.AddWithValue("@root_account_id", 2);
+
+
+
+                        command.CommandText = sqlCreate;
+                        connectionSection.Open();
+                        command.ExecuteNonQuery();
+                        connectionSection.Close();
+                    }
+                }
+                catch (Exception ex) { Console.WriteLine(ex); }
+
+            }
+            int localId = FetchLocalId(attendance.uuid, 2);
+
+            InsertMUUID("ATTENDANCE", attendance.uuid, localId);
+
         }
 
 
@@ -599,9 +694,9 @@ namespace CanvasRabbitMQReceiver
                     using (MySqlCommand command = connection.CreateCommand())
                     {
                         command.CommandText = sql;
-                        command.Parameters.AddWithValue("@Uuid", uuid);
+                        command.Parameters.AddWithValue("@uuid", uuid);
                         command.Parameters.AddWithValue("@entityVersion", entityVersion);
-                        command.Parameters.AddWithValue("@Source", source);
+                        command.Parameters.AddWithValue("@source", source);
 
                         command.ExecuteNonQuery();
                     }
@@ -621,9 +716,9 @@ namespace CanvasRabbitMQReceiver
                         using (MySqlCommand command = connection.CreateCommand())
                         {
                             command.CommandText = sql;
-                            command.Parameters.AddWithValue("@Uuid", uuid);
+                            command.Parameters.AddWithValue("@uuid", uuid);
                             command.Parameters.AddWithValue("@entityVersion", entityVersion);
-                            command.Parameters.AddWithValue("@Source", source);
+                            command.Parameters.AddWithValue("@source", source);
 
                             command.ExecuteNonQuery();
                         }
@@ -659,8 +754,8 @@ namespace CanvasRabbitMQReceiver
                     using (MySqlCommand command = connection.CreateCommand())
                     {
                         command.CommandText = sql;
-                        command.Parameters.AddWithValue("@Uuid", uuid);
-                        command.Parameters.AddWithValue("@Source", source);
+                        command.Parameters.AddWithValue("@uuid", uuid);
+                        command.Parameters.AddWithValue("@source", source);
 
                         command.ExecuteNonQuery();
                     }
@@ -679,8 +774,8 @@ namespace CanvasRabbitMQReceiver
                         using (MySqlCommand command = connection.CreateCommand())
                         {
                             command.CommandText = sql;
-                            command.Parameters.AddWithValue("@Uuid", uuid);
-                            command.Parameters.AddWithValue("@Source", source);
+                            command.Parameters.AddWithValue("@uuid", uuid);
+                            command.Parameters.AddWithValue("@source", source);
 
                             command.ExecuteNonQuery();
                         }
@@ -700,6 +795,7 @@ namespace CanvasRabbitMQReceiver
         public static int FetchLocalId(String uuid,int type) {
             String location = "public.users";
             if (type < 1) { location = "public.calendar_events"; }
+            if (type > 1) { location = "public.enrollments"; }
             String constring = "Host=10.3.17.67; Database = canvas_development; User ID = postgres; Password = ubuntu123;";
             String sqlFetchId = "SELECT id FROM "+location+" WHERE  uuid = @uuid";
             int id = 1;
@@ -755,4 +851,4 @@ namespace CanvasRabbitMQReceiver
 
  
     }
-    } 
+    }
