@@ -251,8 +251,8 @@ namespace CanvasRabbitMQReceiver
                     command.Parameters.AddWithValue("@location_name", canvasEvent.location);
                     command.Parameters.AddWithValue("@location_address", canvasEvent.location);
                     command.Parameters.AddWithValue("@workflow_state", "active");
-                    command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                     command.Parameters.AddWithValue("@root_account_id", rootAccId);
                     command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
 
@@ -271,8 +271,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@context_id", courseNumber);
                         command.Parameters.AddWithValue("@root_account_id", rootAccId);
                         command.Parameters.AddWithValue("@name", canvasEvent.title);
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                         command.Parameters.AddWithValue("@workflow_state", "active");
 
                         command.CommandText = sqlSection;
@@ -311,7 +311,7 @@ namespace CanvasRabbitMQReceiver
                     command.Parameters.AddWithValue("@title", canvasEvent.title);
                     command.Parameters.AddWithValue("@location_name", canvasEvent.location);
                     command.Parameters.AddWithValue("@location_address", canvasEvent.location);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                     command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
                     command.CommandText = sqlEvent;
                     connection.Open();
@@ -326,7 +326,7 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connectionSection.CreateCommand())
                 {
                     command.Parameters.AddWithValue("@name", canvasEvent.title);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                     command.Parameters.AddWithValue("@oldname", localName);
                     command.CommandText = sqlSection;
                     connectionSection.Open();
@@ -350,8 +350,8 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connection.CreateCommand())
                 {
                    
-                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10));
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                     command.Parameters.AddWithValue("@workflow_state", "deleted");
                     command.Parameters.AddWithValue("@uuid", canvasEvent.uuid);
 
@@ -367,8 +367,8 @@ namespace CanvasRabbitMQReceiver
                 using (NpgsqlCommand command = connectionSection.CreateCommand())
                 {
 
-                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10));
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                     command.Parameters.AddWithValue("@workflow_state", "deleted");
                     command.Parameters.AddWithValue("@name", canvasEvent.title);
                     command.CommandText = sqlSection;
@@ -407,8 +407,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
                         command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
                         command.Parameters.AddWithValue("@workflow_state", "registered");
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                         command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
                         command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
 
@@ -432,8 +432,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@type", roleTitle);
                         command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
                         command.Parameters.AddWithValue("@workflow_state", "active");
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                         command.Parameters.AddWithValue("@eventuuid", "Events-Desiderius");
                         command.Parameters.AddWithValue("@root_account_id", 2);
                         command.Parameters.AddWithValue("@role_id", roleId);
@@ -480,8 +480,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@type", roleTitle);
                         command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
                         command.Parameters.AddWithValue("@workflow_state", "active");
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                         command.Parameters.AddWithValue("@eventuuid", "Events-Desiderius");
                         command.Parameters.AddWithValue("@root_account_id", 2);
                         command.Parameters.AddWithValue("@role_id", roleId);
@@ -517,7 +517,7 @@ namespace CanvasRabbitMQReceiver
 
                     command.Parameters.AddWithValue("@name", canvasUser.lastName + " " + canvasUser.firstName);
                     command.Parameters.AddWithValue("@sortable_name", canvasUser.lastName + ", " + canvasUser.firstName);
-                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                    command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                     command.Parameters.AddWithValue("@short_name", canvasUser.firstName + ", " + canvasUser.lastName);
                     command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
 
@@ -541,7 +541,7 @@ namespace CanvasRabbitMQReceiver
                     using (NpgsqlCommand command = connection.CreateCommand())
                     {
 
-                        command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@deleted_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                         command.Parameters.AddWithValue("@workflow_state", "deleted");
                         command.Parameters.AddWithValue("@updated_at", DateTime.Now);
                         command.Parameters.AddWithValue("@uuid", canvasUser.uuid);
@@ -574,8 +574,8 @@ namespace CanvasRabbitMQReceiver
                         command.Parameters.AddWithValue("@useruuid", attendance.attendeeId);
                         command.Parameters.AddWithValue("@uuid", attendance.uuid);
                         command.Parameters.AddWithValue("@workflow_state", "active");
-                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10));
-                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10));
+                        command.Parameters.AddWithValue("@created_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
+                        command.Parameters.AddWithValue("@updated_at", DateTime.Now.AddSeconds(-10).AddHours(-2));
                         command.Parameters.AddWithValue("@eventuuid", attendance.eventId);
                         command.Parameters.AddWithValue("@root_account_id", 2);
 
